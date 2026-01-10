@@ -1,0 +1,16 @@
+{
+  "accountAssociation": {
+    "header": "eyJmaWQiOjAsInR5cGUiOiJjdXN0b2R5Iiwia2V5IjoiMHgwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwIn0",
+    "payload": "eyJkb21haW4iOiJiYXNlcmFuay54eXoifQ",
+    "signature": "REPLACE_WITH_ACTUAL_SIGNATURE"
+  },
+  "frame": {
+    "version": "1",
+    "name": "BaseRank Protocol",
+    "iconUrl": "https://baserank.xyz/icon.png",
+    "homeUrl": "https://baserank.xyz",
+    "splashImageUrl": "https://baserank.xyz/splash.png",
+    "splashBackgroundColor": "#000000",
+    "webhookUrl": "https://baserank.xyz/api/webhook"
+  }
+}

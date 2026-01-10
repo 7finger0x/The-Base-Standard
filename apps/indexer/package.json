@@ -1,0 +1,24 @@
+{
+  "name": "baserank-indexer",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "ponder dev",
+    "start": "ponder start",
+    "codegen": "ponder codegen",
+    "serve": "ponder serve"
+  },
+  "dependencies": {
+    "@ponder/core": "^0.6.0",
+    "hono": "^4.0.0",
+    "viem": "^2.21.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.6.0"
+  },
+  "engines": {
+    "node": ">=18.14"
+  }
+}
