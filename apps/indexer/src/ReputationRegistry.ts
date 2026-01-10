@@ -1,11 +1,11 @@
-import { ponder } from "@/generated";
-import { 
-  account, 
-  linkedWallet, 
-  zoraMint, 
-  collection, 
-  scoreSnapshot 
-} from "../ponder.schema";
+import { ponder } from "ponder:registry";
+import {
+  account,
+  linkedWallet,
+  zoraMint,
+  collection,
+  scoreSnapshot
+} from "ponder:schema";
 import { getTierFromScore, calculateTotalScore } from "./utils";
 
 // ============================================

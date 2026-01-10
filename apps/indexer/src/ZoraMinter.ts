@@ -1,5 +1,5 @@
-import { ponder } from "@/generated";
-import { account, zoraMint, collection, linkedWallet } from "../ponder.schema";
+import { ponder } from "ponder:registry";
+import { account, zoraMint, collection, linkedWallet } from "ponder:schema";
 import { getTierFromScore, isEarlyMint, EARLY_MINT_BONUS } from "./utils";
 
 // ============================================

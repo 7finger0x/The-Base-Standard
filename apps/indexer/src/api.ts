@@ -1,6 +1,6 @@
-import { ponder } from "@/generated";
-import { account, linkedWallet, zoraMint, scoreSnapshot } from "../ponder.schema";
-import { desc, eq, and, gte, sql } from "@ponder/core";
+import { ponder } from "ponder:registry";
+import { account, linkedWallet, zoraMint, scoreSnapshot } from "ponder:schema";
+import { desc, eq, and, gte } from "ponder:core";
 
 // ============================================
 // GRAPHQL API EXTENSIONS
