@@ -1,32 +1,75 @@
 import { NextResponse } from 'next/server';
-
-const PONDER_URL = process.env.PONDER_URL || 'http://localhost:42069';
+import { Errors, success, error } from '@/lib/api-utils';
+import { isServiceConfigured, PONDER_URL } from '@/lib/env';
+import { dbService } from '@/lib/database-service';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const address = searchParams.get('address');
 
+  // Validate address parameter
   if (!address) {
-    return NextResponse.json({ error: 'Address required' }, { status: 400 });
+    return NextResponse.json(
+      error(Errors.WALLET_REQUIRED()),
+      { status: 400 }
+    );
+  }
+
+  // Validate wallet address format
+  if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
+    return NextResponse.json(
+      error(Errors.WALLET_INVALID()),
+      { status: 400 }
+    );
   }
 
   try {
-    // Try to fetch from Ponder indexer
-    const ponderResponse = await fetch(`${PONDER_URL}/api/reputation/${address}`, {
-      next: { revalidate: 5 }, // Cache for 5 seconds
-    });
+    // Check if Ponder service is configured and healthy
+    if (isServiceConfigured('ponder')) {
+      try {
+        const ponderResponse = await fetch(`${PONDER_URL}/api/reputation/${address.toLowerCase()}`, {
+          next: { revalidate: 5 }, // Cache for 5 seconds
+        });
 
-    if (ponderResponse.ok) {
-      const data = await ponderResponse.json();
-      return NextResponse.json(data);
+        if (ponderResponse.ok) {
+          const data = await ponderResponse.json();
+          return NextResponse.json(success(data));
+        }
+      } catch (error) {
+        console.warn('Ponder service unavailable:', error);
+      }
     }
-  } catch (error) {
-    console.log('Ponder not available, using mock data');
-  }
 
-  // Fallback to mock data if Ponder is not running
-  const mockScore = generateMockScore(address);
-  return NextResponse.json(mockScore);
+    // Fallback to database lookup
+    try {
+      const user = await dbService.getUserByAddress(address);
+      if (user) {
+        const rankData = await dbService.getUserRank(address);
+        
+        return NextResponse.json(success({
+          address: user.address,
+          totalScore: user.score,
+          tier: user.tier,
+          rank: rankData?.rank,
+          totalUsers: rankData?.totalUsers,
+          lastUpdated: user.lastUpdated.toISOString(),
+        }));
+      }
+    } catch (dbError) {
+      console.warn('Database lookup failed:', dbError);
+    }
+
+    // Final fallback to mock data
+    const mockScore = generateMockScore(address);
+    return NextResponse.json(success(mockScore));
+
+  } catch (err) {
+    console.error('Reputation API error:', err);
+    return NextResponse.json(
+      error(Errors.INTERNAL_SERVER_ERROR()),
+      { status: 500 }
+    );
+  }
 }
 
 function generateMockScore(address: string) {

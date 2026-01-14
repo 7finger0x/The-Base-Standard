@@ -132,7 +132,8 @@ describe('formatAddressWithNames', () => {
   it('should return shortened address when no name found', async () => {
     const address = '0x1234567890123456789012345678901234567890';
     const result = await formatAddressWithNames(address);
-    expect(result).toBe('0x12345678...34567890');
+    // Default is 6 chars, so 0x + 6 chars ... + 6 chars
+    expect(result).toBe('0x123456...567890');
   });
 
   it('should return full address when showFull is true and no name', async () => {

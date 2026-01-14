@@ -29,7 +29,7 @@ contract ReputationRegistry is Ownable, EIP712 {
     }
 
     function _domainNameAndVersion() internal pure override returns (string memory, string memory) {
-        return ("BaseRank", "1");
+        return ("The Base Standard", "1");
     }
 
     function linkWallet(address secondary, uint256 deadline, bytes calldata signature) external {

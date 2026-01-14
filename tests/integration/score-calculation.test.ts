@@ -45,14 +45,14 @@ describe('Score Calculation Integration', () => {
     });
 
     it('should reach Gold tier with high activity', () => {
-      const baseTenure = 200; // 200 days
+      const baseTenure = 250; // 250 days
       const zoraMints = 40; // 40 mints
       const earlyMints = 2; // 2 early mints
 
       const totalScore = baseTenure + (zoraMints * 10) + (earlyMints * 100);
       const tier = getTierFromScore(totalScore);
 
-      expect(totalScore).toBe(800); // 200 + 400 + 200
+      expect(totalScore).toBe(850); // 250 + 400 + 200
       expect(tier).toBe('Gold');
     });
 
@@ -102,7 +102,8 @@ describe('Score Calculation Integration', () => {
 
       const tier = getTierFromScore(totalScore);
 
-      expect(totalScore).toBe(550); // 150 + 150 + 200 + 50
+      // 150 (baseTenure) + 150 (zoraMints) + 200 (earlyMints) = 500
+      expect(totalScore).toBe(500);
       expect(tier).toBe('Silver');
     });
   });

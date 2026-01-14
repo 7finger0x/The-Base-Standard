@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useAccount, useSignTypedData, useSwitchChain, useWalletClient } from 'wagmi';
+import { useAccount, useSwitchChain, useWalletClient } from 'wagmi';
 import { useQueryClient } from '@tanstack/react-query';
 import { useReputation } from '@/hooks/useReputation';
 import { useLinkWallet } from '@/hooks/useLinkWallet';
@@ -17,6 +17,7 @@ export function WalletList() {
   const { baseName: primaryBaseName, resolveName: resolvePrimaryName } = useNameResolution();
   
   const linkedWallets = reputation?.linkedWallets ?? [];
+  const linkedWalletsKey = linkedWallets.join(',');
 
   // Resolve names for all wallets
   useEffect(() => {
@@ -41,7 +42,8 @@ export function WalletList() {
     };
     
     resolveAllNames();
-  }, [address, linkedWallets, resolvePrimaryName]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [address, linkedWalletsKey, resolvePrimaryName]);
 
   return (
     <div className="p-6 rounded-2xl border border-zinc-800 bg-zinc-900/50 backdrop-blur-sm">
@@ -147,14 +149,12 @@ function LinkWalletModal({ onClose, primaryBaseName }: { onClose: () => void; pr
   const stepOrder: Array<'input' | 'validate' | 'sign' | 'execute' | 'success'> = ['input', 'validate', 'sign', 'execute', 'success'];
   
   const [secondaryAddress, setSecondaryAddress] = useState('');
-  const [secondaryName, setSecondaryName] = useState('');
   const { signLink, executeLink, isLoading } = useLinkWallet();
   const { address: mainAddress } = useAccount();
   const { switchChain } = useSwitchChain();
   const { data: walletClient } = useWalletClient();
   const queryClient = useQueryClient();
   const [step, setStep] = useState<'input' | 'validate' | 'sign' | 'execute' | 'success'>('input');
-  const [nonce, setNonce] = useState(BigInt(0));
   const [error, setError] = useState<string | null>(null);
   
   const { baseName: secondaryBaseName, resolveName: resolveSecondaryName } = useNameResolution();
@@ -211,10 +211,10 @@ function LinkWalletModal({ onClose, primaryBaseName }: { onClose: () => void; pr
       setStep('sign');
       
       // Step 1: Sign with secondary wallet
-      const result = await signLink(
+      await signLink(
         mainAddress,
         secondaryAddress as `0x${string}`,
-        nonce
+        BigInt(0)
       );
       
       setStep('execute');
@@ -225,9 +225,9 @@ function LinkWalletModal({ onClose, primaryBaseName }: { onClose: () => void; pr
       setStep('success');
       
       // Optimistic update
-      queryClient.setQueryData(['reputation'], (old: any) => ({
+      queryClient.setQueryData(['reputation'], (old: Record<string, unknown> | undefined) => ({
         ...old,
-        linkedWallets: [...(old?.linkedWallets ?? []), secondaryAddress],
+        linkedWallets: [...((old?.linkedWallets as string[]) ?? []), secondaryAddress],
       }));
       
       // Auto-close after success
@@ -235,11 +235,12 @@ function LinkWalletModal({ onClose, primaryBaseName }: { onClose: () => void; pr
         onClose();
       }, 2000);
       
-    } catch (err: any) {
+    } catch (err: unknown) {
       // Rollback on failure
       queryClient.invalidateQueries({ queryKey: ['reputation'] });
       console.error('Failed to link wallet:', err);
-      setError(err.message || 'Failed to link wallet');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to link wallet';
+      setError(errorMessage);
       setStep('input');
     }
   };

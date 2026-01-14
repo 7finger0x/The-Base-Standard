@@ -18,7 +18,7 @@ export async function GET(request: Request) {
       const data = await ponderResponse.json();
       return NextResponse.json(data);
     }
-  } catch (error) {
+  } catch {
     console.log('Ponder not available, using mock data');
   }
 
@@ -28,14 +28,13 @@ export async function GET(request: Request) {
 }
 
 function generateMockLeaderboard(limit: number, offset: number) {
-  const tiers = ['BASED', 'Gold', 'Silver', 'Bronze', 'Novice'];
   const leaderboard = [];
 
   for (let i = 0; i < limit; i++) {
     const rank = offset + i + 1;
     const score = Math.max(0, 1200 - rank * 10 + Math.floor(Math.random() * 50));
     const tier = score >= 1000 ? 'BASED' : score >= 850 ? 'Gold' : score >= 500 ? 'Silver' : score >= 100 ? 'Bronze' : 'Novice';
-    
+
     leaderboard.push({
       rank,
       address: `0x${rank.toString(16).padStart(4, '0')}${'0'.repeat(36)}`,
@@ -43,6 +42,14 @@ function generateMockLeaderboard(limit: number, offset: number) {
       tier,
     });
   }
+
+  // Sort by score descending to ensure proper ordering
+  leaderboard.sort((a, b) => b.score - a.score);
+
+  // Re-assign ranks after sorting
+  leaderboard.forEach((user, index) => {
+    user.rank = offset + index + 1;
+  });
 
   return {
     leaderboard,

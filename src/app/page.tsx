@@ -52,7 +52,7 @@ export default function HomePage() {
             </div>
             <div>
               <h1 className="text-xl font-black tracking-tight text-gradient">
-                BaseRank
+                The Base Standard
               </h1>
               <p className="text-[10px] text-zinc-500 uppercase tracking-widest">Protocol</p>
             </div>
@@ -171,7 +171,7 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="relative border-t border-zinc-800/50 mt-16">
         <div className="max-w-6xl mx-auto px-4 py-6 flex items-center justify-between text-sm text-zinc-500">
-          <p>© 2025 BaseRank Protocol</p>
+          <p>© 2025 The Base Standard Protocol</p>
           <div className="flex items-center gap-4">
             <span>Built on Base + Zora</span>
           </div>

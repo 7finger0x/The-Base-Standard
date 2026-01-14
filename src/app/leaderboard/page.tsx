@@ -41,7 +41,7 @@ export default function LeaderboardPage() {
             <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
               <span className="text-white font-black text-sm">BR</span>
             </div>
-            <span className="font-bold text-gradient">BaseRank</span>
+            <span className="font-bold text-gradient">The Base Standard</span>
           </Link>
           <h1 className="text-xl font-bold text-zinc-400">Leaderboard</h1>
         </div>

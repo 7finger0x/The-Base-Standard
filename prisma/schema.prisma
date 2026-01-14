@@ -1,0 +1,79 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// User reputation scores and rankings
+model User {
+  id              String     @id @default(uuid())
+  address         String     @unique
+  ensName         String?
+  score           Float      @default(0)
+  rank            Int        @default(0)
+  tier            String     @default("BRONZE")
+  lastUpdated     DateTime   @default(now())
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  // Related records
+  reputationLogs  ReputationLog[]
+  activityLogs    ActivityLog[]
+
+  @@index([score])
+  @@index([rank])
+  @@index([tier])
+}
+
+// Detailed reputation breakdown
+model ReputationLog {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  category    String   // base_activity, nft_trading, social_engagement, etc.
+  points      Float
+  multiplier  Float    @default(1.0)
+  timestamp   DateTime @default(now())
+  metadata    String?
+
+  @@index([userId])
+  @@index([category])
+  @@index([timestamp])
+}
+
+// User activity tracking
+model ActivityLog {
+  id          String   @id @default(uuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  type        String   // transaction, nft_purchase, social_post, etc.
+  contract    String?
+  tokenId     String?
+  amount      Float?
+  timestamp   DateTime @default(now())
+  metadata    String?
+
+  @@index([userId])
+  @@index([type])
+  @@index([timestamp])
+}
+
+// Leaderboard snapshots
+model LeaderboardSnapshot {
+  id        String   @id @default(uuid())
+  timestamp DateTime @default(now())
+  topUsers  String   // Store top N users as JSON for quick access
+  totalUsers Int
+  
+  @@index([timestamp])
+}

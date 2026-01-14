@@ -25,7 +25,7 @@ export function getTierFromScore(score: number): string {
 export async function resolveBaseName(address: string): Promise<string | null> {
   try {
     // Base Names registry contract address (this is the actual Base Names registry)
-    const BASE_NAMES_REGISTRY = '0x4cCb0BB02FCABA27e82a56646E81d8c5bC4119a5';
+    // const BASE_NAMES_REGISTRY = '0x4cCb0BB02FCABA27e82a56646E81d8c5bC4119a5';
     
     // Simple check - in production, you'd use the actual Base Names contract
     // For now, we'll simulate the resolution
@@ -42,7 +42,8 @@ export async function resolveBaseName(address: string): Promise<string | null> {
   }
 }
 
-export async function reverseResolveBaseName(name: string): Promise<string | null> {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export async function reverseResolveBaseName(_name: string): Promise<string | null> {
   try {
     // Reverse lookup - convert name back to address
     // This would typically query the Base Names registry
@@ -60,7 +61,7 @@ export async function formatAddressWithNames(address: string, showFull = false):
   const baseName = await resolveBaseName(address);
   
   if (baseName) {
-    return showFull ? `${baseName}.base.eth` : `${baseName}.base.eth`;
+    return `${baseName}.base.eth`;
   }
   
   return showFull ? address : shortenAddress(address, 6);

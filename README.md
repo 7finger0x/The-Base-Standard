@@ -1,6 +1,6 @@
-# BaseRank Protocol
+# The Base Standard
 
-On-chain reputation scoring across Base and Zora networks.
+On-chain reputation scoring across Base and Zora networks - establishing the standard for Base L2 credibility.
 
 ## Features
 

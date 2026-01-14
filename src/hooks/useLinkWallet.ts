@@ -6,7 +6,7 @@ import { type Address, type Hex } from 'viem';
 
 // The EIP-712 Domain Separator
 const domain = {
-  name: 'BaseRank',
+  name: 'The Base Standard',
   version: '1',
   chainId: reputationRegistryConfig.chainId,
   verifyingContract: reputationRegistryConfig.address,

@@ -17,7 +17,7 @@ export function ShareButton({ score, tier, className }: ShareButtonProps) {
       await shareScore(score, tier);
     } else {
       // Web share fallback
-      const text = `My BaseRank Score: ${score} (${tier}) 🏆\n\nCheck your on-chain reputation: https://baserank.xyz`;
+      const text = `My The Base Standard Score: ${score} (${tier}) 🏆\n\nCheck your on-chain reputation: https://baserank.xyz`;
       
       if (navigator.share) {
         await navigator.share({ text });

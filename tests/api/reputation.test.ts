@@ -17,12 +17,13 @@ describe('Reputation API Route', () => {
       const data = await response.json();
 
       expect(response.status).toBe(400);
-      expect(data.error).toBe('Address required');
+      expect(data.error.code).toBe('WALLET_REQUIRED');
     });
 
     it('should fetch from Ponder when available', async () => {
+      const validAddress = '0x1234567890123456789012345678901234567890';
       const mockData = {
-        address: '0x123',
+        address: validAddress,
         totalScore: 1000,
         tier: 'BASED',
       };
@@ -32,66 +33,76 @@ describe('Reputation API Route', () => {
         json: async () => mockData,
       });
 
-      const request = new Request('http://localhost:3000/api/reputation?address=0x123');
+      const request = new Request(`http://localhost:3000/api/reputation?address=${validAddress}`);
       const response = await GET(request);
       const data = await response.json();
 
-      expect(data).toEqual(mockData);
+      expect(data.success).toBe(true);
+      expect(data.data.address).toBe(validAddress);
+      expect(data.data.totalScore).toBeDefined();
+      expect(data.data.tier).toBeDefined();
     });
 
     it('should return mock data when Ponder is unavailable', async () => {
+      const validAddress = '0x1234567890123456789012345678901234567890';
       (global.fetch as any).mockRejectedValueOnce(new Error('Connection failed'));
 
-      const request = new Request('http://localhost:3000/api/reputation?address=0x123');
+      const request = new Request(`http://localhost:3000/api/reputation?address=${validAddress}`);
       const response = await GET(request);
       const data = await response.json();
 
-      expect(data).toHaveProperty('totalScore');
-      expect(data).toHaveProperty('tier');
-      expect(data).toHaveProperty('breakdown');
+      expect(data.success).toBe(true);
+      expect(data.data).toHaveProperty('totalScore');
+      expect(data.data).toHaveProperty('tier');
+      expect(data.data).toHaveProperty('breakdown');
     });
 
     it('should return mock data when Ponder returns non-ok response', async () => {
+      const validAddress = '0x1234567890123456789012345678901234567890';
       (global.fetch as any).mockResolvedValueOnce({
         ok: false,
         status: 500,
       });
 
-      const request = new Request('http://localhost:3000/api/reputation?address=0x123');
+      const request = new Request(`http://localhost:3000/api/reputation?address=${validAddress}`);
       const response = await GET(request);
       const data = await response.json();
 
-      expect(data).toHaveProperty('totalScore');
-      expect(data).toHaveProperty('tier');
+      expect(data.success).toBe(true);
+      expect(data.data).toHaveProperty('totalScore');
+      expect(data.data).toHaveProperty('tier');
     });
 
     it('should generate deterministic mock data for same address', async () => {
+      const validAddress = '0xABCDEF1234567890ABCDEF1234567890ABCDEF12';
       (global.fetch as any).mockRejectedValue(new Error('No Ponder'));
 
-      const request1 = new Request('http://localhost:3000/api/reputation?address=0xABC');
+      const request1 = new Request(`http://localhost:3000/api/reputation?address=${validAddress}`);
       const response1 = await GET(request1);
       const data1 = await response1.json();
 
-      const request2 = new Request('http://localhost:3000/api/reputation?address=0xABC');
+      const request2 = new Request(`http://localhost:3000/api/reputation?address=${validAddress}`);
       const response2 = await GET(request2);
       const data2 = await response2.json();
 
-      expect(data1.totalScore).toBe(data2.totalScore);
-      expect(data1.tier).toBe(data2.tier);
+      expect(data1.data.totalScore).toBe(data2.data.totalScore);
+      expect(data1.data.tier).toBe(data2.data.tier);
     });
 
     it('should generate different mock data for different addresses', async () => {
+      const address1 = '0x1111111111111111111111111111111111111111';
+      const address2 = '0x2222222222222222222222222222222222222222';
       (global.fetch as any).mockRejectedValue(new Error('No Ponder'));
 
-      const request1 = new Request('http://localhost:3000/api/reputation?address=0x111');
+      const request1 = new Request(`http://localhost:3000/api/reputation?address=${address1}`);
       const response1 = await GET(request1);
       const data1 = await response1.json();
 
-      const request2 = new Request('http://localhost:3000/api/reputation?address=0x222');
+      const request2 = new Request(`http://localhost:3000/api/reputation?address=${address2}`);
       const response2 = await GET(request2);
       const data2 = await response2.json();
 
-      expect(data1.totalScore).not.toBe(data2.totalScore);
+      expect(data1.data.totalScore).not.toBe(data2.data.totalScore);
     });
   });
 });

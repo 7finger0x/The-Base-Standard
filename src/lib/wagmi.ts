@@ -6,7 +6,7 @@ export const wagmiConfig = createConfig({
   chains: [base, baseSepolia],
   connectors: [
     coinbaseWallet({
-      appName: 'BaseRank Protocol',
+      appName: 'The Base Standard Protocol',
       preference: 'all', // Allow both smart and EOA wallets
     }),
   ],

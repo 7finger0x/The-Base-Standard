@@ -1,15 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { resolveBaseName, reverseResolveBaseName } from '@/lib/utils';
-
-interface UseNameResolutionReturn {
-  baseName: string | null;
-  isLoading: boolean;
-  error: Error | null;
-  resolveName: (address: string) => Promise<void>;
-  reverseResolve: (name: string) => Promise<void>;
-}
 
 export function useNameResolution() {
   const [baseName, setBaseName] = useState<string | null>(null);
@@ -40,7 +32,7 @@ export function useNameResolution() {
     setError(null);
     
     try {
-      const address = await reverseResolveBaseName(name);
+      await reverseResolveBaseName(name);
       // We could store the address if needed
     } catch (err) {
       setError(err instanceof Error ? err : new Error('Failed to reverse resolve'));

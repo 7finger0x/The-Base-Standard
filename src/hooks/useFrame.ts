@@ -58,7 +58,7 @@ export function useFrame() {
 
     try {
       await sdk.actions.composeCast({
-        text: `My BaseRank Score: ${score} (${tier}) 🏆\n\nCheck your on-chain reputation:`,
+        text: `My The Base Standard Score: ${score} (${tier}) 🏆\n\nCheck your on-chain reputation:`,
         embeds: ['https://baserank.xyz'],
       });
     } catch (error) {
