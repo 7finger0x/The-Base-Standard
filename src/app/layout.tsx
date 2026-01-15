@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Providers } from './providers';
+import MyStatsig from './my-statsig';
 import './globals.css';
 
 // Determine the base URL for metadata (social images)
@@ -49,8 +50,22 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="min-h-screen bg-black text-white antialiased">
-        <Providers>{children}</Providers>
+      <head>
+        {/* Meticulous recorder - must be first script to load */}
+        {(process.env.NODE_ENV === 'development' ||
+          process.env.VERCEL_ENV === 'preview') && (
+          // eslint-disable-next-line @next/next/no-sync-scripts
+          <script
+            data-recording-token="jVxpO0mkJ5BCQ3Gha8Wl9IXhKZDvggAidDXI1AV0"
+            data-is-production-environment="false"
+            src="https://snippet.meticulous.ai/v1/meticulous.js"
+          />
+        )}
+      </head>
+      <body className="min-h-screen bg-white text-gray-900 antialiased">
+        <MyStatsig>
+          <Providers>{children}</Providers>
+        </MyStatsig>
         <SpeedInsights />
       </body>
     </html>

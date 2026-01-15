@@ -12,10 +12,10 @@ export function ScoreBreakdown() {
   if (isLoading || !reputation) {
     return (
       <div className="space-y-4 animate-pulse">
-        <div className="h-8 bg-zinc-800 rounded w-1/3" />
+        <div className="h-8 bg-gray-200 rounded w-1/3" />
         <div className="grid gap-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="h-24 bg-zinc-800 rounded-xl" />
+            <div key={i} className="h-24 bg-gray-200 rounded-xl" />
           ))}
         </div>
       </div>
@@ -35,7 +35,7 @@ export function ScoreBreakdown() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-white">Score Breakdown</h3>
+        <h3 className="text-lg font-semibold text-gray-900">Score Breakdown</h3>
         {reputation.multiplier && reputation.multiplier > 1 && (
           <span className="px-2 py-1 text-xs font-medium text-emerald-400 bg-emerald-400/10 rounded-full border border-emerald-400/20">
             {reputation.multiplier}x Multiplier
@@ -95,21 +95,21 @@ function PillarCard({ title, score, max, icon, color, description }: PillarCardP
   const percentage = Math.min(100, (score / max) * 100);
   
   return (
-    <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+    <div className="p-4 rounded-xl bg-gray-50 border border-gray-200">
       <div className="flex justify-between items-start mb-2">
         <div className="flex items-center gap-2">
           <span className="text-xl">{icon}</span>
           <div>
-            <div className="font-medium text-white">{title}</div>
-            <div className="text-xs text-zinc-500">{description}</div>
+            <div className="font-medium text-gray-900">{title}</div>
+            <div className="text-xs text-gray-500">{description}</div>
           </div>
         </div>
         <div className="text-right">
-          <div className="font-bold text-white">{Math.round(score)} / {max}</div>
-          <div className="text-xs text-zinc-500">{Math.round(percentage)}%</div>
+          <div className="font-bold text-gray-900">{Math.round(score)} / {max}</div>
+          <div className="text-xs text-gray-500">{Math.round(percentage)}%</div>
         </div>
       </div>
-      <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+      <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
         <div 
           className={`h-full ${color} transition-all duration-1000`} 
           style={{ width: `${percentage}%` }}

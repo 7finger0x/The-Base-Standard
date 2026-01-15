@@ -37,31 +37,19 @@ export function Logo({ variant = 'icon', size = 'md', className, showText = true
 
   return (
     <div className={cn('flex items-center gap-3', className)}>
-      {/* Logo Image/Icon */}
+      {/* Logo Image/Icon - Solid Blue Square for Light Theme */}
       <div className={cn(
-        'rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center flex-shrink-0',
-        sizeClasses[size]
+        'bg-blue-600 flex items-center justify-center flex-shrink-0 relative',
+        size === 'sm' ? 'w-8 h-8' : size === 'md' ? 'w-10 h-10' : size === 'lg' ? 'w-12 h-12' : 'w-16 h-16',
+        className
       )}>
-        {/* Try to load actual logo, fallback to gradient badge */}
-        <div className="relative w-full h-full">
-          {/* Uncomment when logo files are added */}
-          {/* <Image
-            src={logoSrc}
-            alt="The Base Standard"
-            fill
-            className="object-contain p-1"
-            onError={(e) => {
-              // Fallback to gradient badge if image doesn't exist
-              e.currentTarget.style.display = 'none';
-            }}
-          /> */}
-          
-          {/* Fallback gradient badge */}
+        <div className="relative w-full h-full flex items-center justify-center">
+          {/* BS Text */}
           <span className={cn(
-            'text-white font-black',
-            size === 'sm' ? 'text-xs' : size === 'md' ? 'text-lg' : size === 'lg' ? 'text-2xl' : 'text-4xl'
+            'text-white font-black leading-none',
+            size === 'sm' ? 'text-xs' : size === 'md' ? 'text-sm' : size === 'lg' ? 'text-base' : 'text-lg'
           )}>
-            BR
+            BS
           </span>
         </div>
       </div>
@@ -70,14 +58,11 @@ export function Logo({ variant = 'icon', size = 'md', className, showText = true
       {showText && variant !== 'icon' && (
         <div>
           <h1 className={cn(
-            'font-black tracking-tight text-gradient',
+            'font-black tracking-tight text-gray-900',
             textSizeClasses[size]
           )}>
             The Base Standard
           </h1>
-          {size !== 'sm' && (
-            <p className="text-[10px] text-zinc-500 uppercase tracking-widest">Protocol</p>
-          )}
         </div>
       )}
     </div>

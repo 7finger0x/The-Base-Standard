@@ -28,6 +28,10 @@ const envSchema = z.object({
 
   // Farcaster
   NEXT_PUBLIC_FARCASTER_HUB_URL: z.string().url().or(z.literal('')).optional(),
+
+  // Inngest
+  INNGEST_EVENT_KEY: z.string().optional(),
+  INNGEST_SIGNING_KEY: z.string().optional(),
 });
 
 // Type inference from schema

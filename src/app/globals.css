@@ -3,8 +3,8 @@
 @tailwind utilities;
 
 :root {
-  --background: #000000;
-  --foreground: #ffffff;
+  --background: #ffffff;
+  --foreground: #1a1a1a;
 }
 
 body {
@@ -57,4 +57,23 @@ body {
 .card-hover:hover {
   @apply -translate-y-1;
   box-shadow: 0 10px 40px rgba(0, 82, 255, 0.2);
+}
+
+/* Gradient border utility */
+.gradient-border {
+  position: relative;
+  background: black;
+  border-radius: 0.75rem;
+}
+
+.gradient-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 0.75rem;
+  padding: 2px;
+  background: linear-gradient(135deg, var(--tw-gradient-stops));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
 }

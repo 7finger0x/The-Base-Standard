@@ -5,3 +5,8 @@ export { ScoreBreakdown } from './ScoreBreakdown';
 export { ShareButton } from './ShareButton';
 export { SignInButton } from './SignInButton';
 export { Logo } from './Logo';
+export { FeatureCard } from './FeatureCard';
+export { TierCard } from './TierCard';
+export { RoadmapSection } from './RoadmapSection';
+export { Sidebar } from './Sidebar';
+export { MetricCard, BaseTenureGraphic, ZoraMintsGraphic, ReputationScoreGraphic, EarlyAdopterGraphic } from './MetricCard';

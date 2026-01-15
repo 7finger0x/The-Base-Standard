@@ -10,24 +10,24 @@ export function RankCard() {
 
   if (!address) {
     return (
-      <div className="p-6 rounded-2xl border border-zinc-800 bg-zinc-900/50 text-center">
-        <p className="text-zinc-400">Connect wallet to view rank</p>
+      <div className="p-6 rounded-2xl border border-gray-200 bg-gray-50 text-center">
+        <p className="text-gray-500">Connect wallet to view rank</p>
       </div>
     );
   }
 
   if (isLoading || !reputation) {
     return (
-      <div className="p-6 rounded-2xl border border-zinc-800 bg-zinc-900/50 animate-pulse">
+      <div className="p-6 rounded-2xl border border-gray-200 bg-gray-50 animate-pulse">
         <div className="flex justify-between items-start mb-6">
-          <div className="h-8 w-32 bg-zinc-800 rounded" />
-          <div className="h-8 w-24 bg-zinc-800 rounded" />
+          <div className="h-8 w-32 bg-gray-200 rounded" />
+          <div className="h-8 w-24 bg-gray-200 rounded" />
         </div>
-        <div className="h-24 bg-zinc-800 rounded mb-6" />
+        <div className="h-24 bg-gray-200 rounded mb-6" />
         <div className="grid grid-cols-3 gap-4">
-          <div className="h-16 bg-zinc-800 rounded" />
-          <div className="h-16 bg-zinc-800 rounded" />
-          <div className="h-16 bg-zinc-800 rounded" />
+          <div className="h-16 bg-gray-200 rounded" />
+          <div className="h-16 bg-gray-200 rounded" />
+          <div className="h-16 bg-gray-200 rounded" />
         </div>
       </div>
     );
@@ -47,17 +47,17 @@ export function RankCard() {
   };
 
   return (
-    <div className="p-6 rounded-2xl border border-zinc-800 bg-zinc-900/50 backdrop-blur-sm">
+    <div className="p-6 rounded-2xl border border-gray-200 bg-white shadow-sm">
       <div className="flex justify-between items-start mb-6">
         <div>
-          <h2 className="text-sm font-medium text-zinc-400 uppercase tracking-wider mb-1">
+          <h2 className="text-sm font-medium text-gray-500 uppercase tracking-wider mb-1">
             Current Rank
           </h2>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-bold text-white">
+            <span className="text-3xl font-bold text-gray-900">
               #{reputation.rank?.toLocaleString() ?? '---'}
             </span>
-            <span className="text-sm text-zinc-500">
+            <span className="text-sm text-gray-500">
               of {reputation.totalUsers?.toLocaleString() ?? '---'}
             </span>
           </div>
@@ -67,16 +67,16 @@ export function RankCard() {
 
       <div className="mb-8">
         <div className="flex justify-between items-end mb-2">
-          <span className="text-sm text-zinc-400">Total Score</span>
-          <span className="text-2xl font-bold text-white">{reputation.totalScore}</span>
+          <span className="text-sm text-gray-500">Total Score</span>
+          <span className="text-2xl font-bold text-gray-900">{reputation.totalScore}</span>
         </div>
-        <div className="h-3 bg-zinc-800 rounded-full overflow-hidden">
+        <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
           <div 
             className="h-full bg-gradient-to-r from-blue-600 to-purple-600 rounded-full transition-all duration-1000"
             style={{ width: `${Math.min(100, (reputation.totalScore / 1000) * 100)}%` }}
           />
         </div>
-        <div className="flex justify-between mt-1 text-xs text-zinc-500">
+        <div className="flex justify-between mt-1 text-xs text-gray-500">
           <span>0</span>
           <span>1000</span>
         </div>
@@ -130,8 +130,8 @@ function PillarStat({
   return (
     <div className={`p-3 rounded-xl border ${borderColor} ${bgColor} flex flex-col items-center text-center`}>
       <span className={`text-xs font-medium ${color} mb-1`}>{label}</span>
-      <span className="text-lg font-bold text-white">{Math.round(score)}</span>
-      <span className="text-[10px] text-zinc-500">/ {max}</span>
+      <span className="text-lg font-bold text-gray-900">{Math.round(score)}</span>
+      <span className="text-[10px] text-gray-500">/ {max}</span>
     </div>
   );
 }

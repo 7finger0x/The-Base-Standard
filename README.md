@@ -70,8 +70,54 @@ Copy `.env.example` to `.env.local` and fill in:
 - `NEXT_PUBLIC_REGISTRY_ADDRESS` - Deployed ReputationRegistry contract address
 - `NEXT_PUBLIC_ONCHAINKIT_API_KEY` - Coinbase OnchainKit API key
 - `ADMIN_API_KEY` - API key for admin endpoints (optional)
+- `INNGEST_EVENT_KEY` - Inngest event key for sending events (optional)
+- `INNGEST_SIGNING_KEY` - Inngest signing key for function authentication (optional)
 
 See `.env.example` for all available variables.
+
+## Inngest Background Jobs
+
+This project uses [Inngest](https://www.inngest.com) for background job processing.
+
+### Setup
+
+1. Install Inngest CLI (for local development):
+   ```bash
+   npm install -g inngest-cli
+   ```
+
+2. Start the Inngest Dev Server (in a separate terminal):
+   ```bash
+   npx inngest-cli@latest dev
+   ```
+
+3. Start your Next.js app:
+   ```bash
+   npm run dev
+   ```
+
+4. Visit http://127.0.0.1:8288 to view the Inngest dashboard
+
+### Usage
+
+Send events to trigger Inngest functions:
+
+```typescript
+import { inngestClient } from '@/inngest/client';
+
+// Trigger reputation calculation
+await inngestClient.send({
+  name: 'reputation/calculate',
+  data: { walletAddress: '0x...' }
+});
+```
+
+### Available Functions
+
+- `hello-world` - Example function triggered by `test/hello.world` event
+- `calculate-reputation-score` - Calculates reputation score for a wallet (triggered by `reputation/calculate` event)
+
+See `src/inngest/functions.ts` for all available functions.
 
 ## Production Deployment
 

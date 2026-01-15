@@ -13,9 +13,10 @@ import {
   Avatar,
   Address,
 } from '@coinbase/onchainkit/identity';
+import { Sidebar } from '@/components/Sidebar';
+import { MetricCard, BaseTenureGraphic, ZoraMintsGraphic, ReputationScoreGraphic, EarlyAdopterGraphic } from '@/components/MetricCard';
 import { RankCard } from '@/components/RankCard';
 import { WalletList } from '@/components/WalletList';
-import { TierBadge } from '@/components/TierBadge';
 import { ScoreBreakdown } from '@/components/ScoreBreakdown';
 import { SignInButton } from '@/components/SignInButton';
 
@@ -23,169 +24,161 @@ export default function HomePage() {
   const { isConnected } = useAccount();
 
   return (
-    <div className="min-h-screen bg-black">
-      {/* Circuit Pattern Background */}
-      <div className="fixed inset-0 opacity-[0.03] pointer-events-none">
-        <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-          <defs>
-            <pattern id="circuit-bg" patternUnits="userSpaceOnUse" width="40" height="40">
-              <path
-                d="M0 20h40M20 0v40"
-                stroke="currentColor"
-                strokeWidth="0.5"
-                fill="none"
-                className="text-cyan-500"
-              />
-              <circle cx="20" cy="20" r="2" fill="currentColor" className="text-purple-500" />
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#circuit-bg)" />
-        </svg>
-      </div>
+    <div className="min-h-screen bg-white">
+      <Sidebar />
 
-      {/* Header */}
-      <header className="relative border-b border-zinc-800/50 backdrop-blur-sm">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
-              <span className="text-white font-black text-lg">BR</span>
-            </div>
-            <div>
-              <h1 className="text-xl font-black tracking-tight text-gradient">
-                The Base Standard
-              </h1>
-              <p className="text-[10px] text-zinc-500 uppercase tracking-widest">Protocol</p>
-            </div>
-          </div>
-
-          {/* Wallet & Sign In */}
-          <div className="flex items-center gap-3">
-            <Wallet>
-              <ConnectWallet className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold px-4 py-2 rounded-lg transition-all">
-                <Avatar className="h-5 w-5" />
-                <Name className="ml-2" />
-              </ConnectWallet>
-              <WalletDropdown>
-                <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
-                  <Avatar className="h-10 w-10" />
-                  <Name className="font-semibold" />
-                  <Address className="text-zinc-400" />
-                </Identity>
-                <WalletDropdownDisconnect />
-              </WalletDropdown>
-            </Wallet>
-            {isConnected && <SignInButton />}
-          </div>
-        </div>
-      </header>
-
-      {/* Main Content */}
-      <main className="relative max-w-6xl mx-auto px-4 py-8">
+      {/* Main Content Area */}
+      <main className="ml-64 min-h-screen">
         {!isConnected ? (
-          /* Not Connected State */
-          <div className="flex flex-col items-center justify-center min-h-[70vh] text-center">
-            {/* Hero */}
-            <div className="mb-8">
-              <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-cyan-500 via-blue-600 to-purple-600 p-1 animate-pulse-glow">
-                <div className="w-full h-full rounded-full bg-black flex items-center justify-center">
-                  <span className="text-5xl font-black text-gradient">BR</span>
-                </div>
-              </div>
+          /* Not Connected State - Landing Page */
+          <>
+            {/* Status Indicator */}
+            <div className="absolute top-4 right-4 flex items-center gap-2 text-sm">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span className="text-gray-600">Base L2</span>
             </div>
 
-            <h2 className="text-4xl md:text-5xl font-black mb-4 text-gradient">
-              What Is Your Base Rank?
-            </h2>
-            <p className="text-zinc-400 text-lg mb-8 max-w-md">
-              Connect your wallet to discover your on-chain reputation score across Base and Zora.
-            </p>
+            {/* Hero Section */}
+            <section className="relative px-12 py-20">
+              {/* Background Pattern */}
+              <div className="absolute inset-0 opacity-30 pointer-events-none">
+                <svg className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
+                  <defs>
+                    <pattern id="hero-pattern" patternUnits="userSpaceOnUse" width="100" height="100">
+                      {Array.from({ length: 20 }).map((_, i) => {
+                        const x = (i % 5) * 20;
+                        const y = Math.floor(i / 5) * 20;
+                        const length = 10 + Math.random() * 40;
+                        const opacity = 0.1 + Math.random() * 0.3;
+                        return (
+                          <line
+                            key={i}
+                            x1={x}
+                            y1={y}
+                            x2={x + length}
+                            y2={y}
+                            stroke="currentColor"
+                            strokeWidth="1"
+                            opacity={opacity}
+                            className="text-gray-400"
+                          />
+                        );
+                      })}
+                      {Array.from({ length: 20 }).map((_, i) => {
+                        const x = (i % 5) * 20;
+                        const y = Math.floor(i / 5) * 20;
+                        const length = 10 + Math.random() * 40;
+                        const opacity = 0.1 + Math.random() * 0.3;
+                        return (
+                          <line
+                            key={`v-${i}`}
+                            x1={x}
+                            y1={y}
+                            x2={x}
+                            y2={y + length}
+                            stroke="currentColor"
+                            strokeWidth="1"
+                            opacity={opacity}
+                            className="text-gray-400"
+                          />
+                        );
+                      })}
+                    </pattern>
+                  </defs>
+                  <rect width="100%" height="100%" fill="url(#hero-pattern)" />
+                </svg>
+              </div>
 
-            <Wallet>
-              <ConnectWallet className="bg-gradient-to-r from-cyan-600 to-purple-600 hover:from-cyan-500 hover:to-purple-500 text-white font-bold text-lg px-8 py-4 rounded-xl shadow-lg shadow-cyan-500/20 transition-all hover:scale-105">
-                Check My Score
-              </ConnectWallet>
-            </Wallet>
+              <div className="relative max-w-4xl">
+                <h1 className="text-6xl md:text-7xl font-black text-gray-900 leading-tight mb-8">
+                  A verifiable reputation system, built by all of us
+                </h1>
+              </div>
+            </section>
 
-            {/* Tier Preview */}
-            <div className="mt-16 w-full max-w-3xl">
-              <p className="text-zinc-500 text-sm uppercase tracking-wider mb-6">Reputation Tiers</p>
-              <div className="grid grid-cols-5 gap-3">
-                <TierBadge tier="TOURIST" size="sm" />
-                <TierBadge tier="RESIDENT" size="sm" />
-                <TierBadge tier="BUILDER" size="sm" />
-                <TierBadge tier="BASED" size="sm" />
-                <TierBadge tier="LEGEND" size="sm" />
-              </div>
-            </div>
+            {/* Secondary Section */}
+            <section className="px-12 py-16">
+              <div className="max-w-6xl mx-auto">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start mb-12">
+                  {/* Left: Headline */}
+                  <div>
+                    <h2 className="text-4xl md:text-5xl font-black text-gray-900 leading-tight">
+                      An open standard for on-chain reputation
+                    </h2>
+                  </div>
 
-            {/* Data Sources */}
-            <div className="mt-16 grid grid-cols-3 gap-8 text-center">
-              <div>
-                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-blue-600/20 flex items-center justify-center">
-                  <span className="text-blue-400 font-bold">B</span>
+                  {/* Right: Description */}
+                  <div>
+                    <p className="text-lg text-gray-700 leading-relaxed">
+                      The Base Standard is built to empower builders, creators, and people everywhere
+                      to establish verifiable on-chain reputation, earn their tier, mint achievement
+                      cards, and prove their commitment to the Base ecosystem.
+                    </p>
+                  </div>
                 </div>
-                <p className="text-zinc-400 text-sm">Base Tenure</p>
-              </div>
-              <div>
-                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-purple-600/20 flex items-center justify-center">
-                  <span className="text-purple-400 font-bold">Z</span>
+
+                {/* Metric Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  <MetricCard
+                    title="BASE TENURE"
+                    description="Days since your first transaction on Base L2. Every day counts toward your reputation."
+                    graphic={<BaseTenureGraphic />}
+                  />
+                  <MetricCard
+                    title="ZORA MINTS"
+                    description="NFTs minted on Zora. Early adopters get bonus points for minting within 24 hours."
+                    graphic={<ZoraMintsGraphic />}
+                  />
+                  <MetricCard
+                    title="REPUTATION SCORE"
+                    description="Your aggregated score across all metrics. Earn your tier and unlock exclusive benefits."
+                    graphic={<ReputationScoreGraphic />}
+                  />
+                  <MetricCard
+                    title="EARLY ADOPTER"
+                    description="Bonus multipliers for being among the first to engage with new collections and protocols."
+                    graphic={<EarlyAdopterGraphic />}
+                  />
                 </div>
-                <p className="text-zinc-400 text-sm">Zora Mints</p>
               </div>
-              <div>
-                <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-violet-600/20 flex items-center justify-center">
-                  <span className="text-violet-400 font-bold">F</span>
-                </div>
-                <p className="text-zinc-400 text-sm">Farcaster</p>
-              </div>
-            </div>
-          </div>
+            </section>
+          </>
         ) : (
-          /* Connected State */
-          <div className="space-y-6">
-            {/* Sign-In Prompt (if not authenticated) */}
-            <SignInButton />
+          /* Connected State - Dashboard */
+          <div className="px-12 py-8">
+            <div className="max-w-6xl mx-auto">
+              <div className="mb-6 flex items-center justify-between">
+                <h1 className="text-3xl font-black text-gray-900">Your Reputation</h1>
+                <Wallet>
+                  <ConnectWallet className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2.5 rounded-lg transition-colors">
+                    <Avatar className="h-5 w-5" />
+                    <Name className="ml-2" />
+                  </ConnectWallet>
+                  <WalletDropdown>
+                    <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
+                      <Avatar className="h-10 w-10" />
+                      <Name className="font-semibold" />
+                      <Address className="text-gray-400" />
+                    </Identity>
+                    <WalletDropdownDisconnect />
+                  </WalletDropdown>
+                </Wallet>
+              </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Score Card */}
-              <RankCard />
+              <SignInButton />
 
-              {/* Score Breakdown */}
-              <ScoreBreakdown />
-            </div>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                <RankCard />
+                <ScoreBreakdown />
+              </div>
 
-            {/* Linked Wallets */}
-            <div className="lg:col-span-2">
-              <WalletList />
-            </div>
-
-            {/* All Tiers */}
-            <div className="lg:col-span-2 mt-4">
-              <h3 className="text-lg font-bold text-zinc-400 uppercase tracking-wider mb-4">
-                All Tiers
-              </h3>
-              <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <TierBadge tier="TOURIST" size="md" />
-                <TierBadge tier="RESIDENT" size="md" />
-                <TierBadge tier="BUILDER" size="md" />
-                <TierBadge tier="BASED" size="md" />
-                <TierBadge tier="LEGEND" size="md" />
+              <div className="mt-6">
+                <WalletList />
               </div>
             </div>
           </div>
         )}
       </main>
-
-      {/* Footer */}
-      <footer className="relative border-t border-zinc-800/50 mt-16">
-        <div className="max-w-6xl mx-auto px-4 py-6 flex items-center justify-between text-sm text-zinc-500">
-          <p>© 2025 The Base Standard Protocol</p>
-          <div className="flex items-center gap-4">
-            <span>Built on Base + Zora</span>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 }
