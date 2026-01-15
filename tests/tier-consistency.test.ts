@@ -17,30 +17,30 @@ import { getTierFromScore as indexerGetTier } from '../apps/indexer/src/utils';
 
 describe('Tier Consistency Across All Implementations', () => {
   const testCases = [
-    // Novice tier
-    { score: 0, expected: 'Novice' },
-    { score: 50, expected: 'Novice' },
-    { score: 99, expected: 'Novice' },
+    // TOURIST tier
+    { score: 0, expected: 'TOURIST' },
+    { score: 50, expected: 'TOURIST' },
+    { score: 350, expected: 'TOURIST' },
 
-    // Bronze tier boundaries
-    { score: 100, expected: 'Bronze' },
-    { score: 250, expected: 'Bronze' },
-    { score: 499, expected: 'Bronze' },
+    // RESIDENT tier boundaries
+    { score: 351, expected: 'RESIDENT' },
+    { score: 500, expected: 'RESIDENT' },
+    { score: 650, expected: 'RESIDENT' },
 
-    // Silver tier boundaries
-    { score: 500, expected: 'Silver' },
-    { score: 700, expected: 'Silver' },
-    { score: 849, expected: 'Silver' },
-
-    // Gold tier boundaries
-    { score: 850, expected: 'Gold' },
-    { score: 900, expected: 'Gold' },
-    { score: 999, expected: 'Gold' },
+    // BUILDER tier boundaries
+    { score: 651, expected: 'BUILDER' },
+    { score: 750, expected: 'BUILDER' },
+    { score: 850, expected: 'BUILDER' },
 
     // BASED tier boundaries
-    { score: 1000, expected: 'BASED' },
-    { score: 5000, expected: 'BASED' },
-    { score: 10000, expected: 'BASED' },
+    { score: 851, expected: 'BASED' },
+    { score: 900, expected: 'BASED' },
+    { score: 950, expected: 'BASED' },
+
+    // LEGEND tier boundaries
+    { score: 951, expected: 'LEGEND' },
+    { score: 1000, expected: 'LEGEND' },
+    { score: 5000, expected: 'LEGEND' },
   ];
 
   describe('Frontend implementation matches expected tiers', () => {
@@ -61,8 +61,7 @@ describe('Tier Consistency Across All Implementations', () => {
 
   describe('Frontend and Indexer implementations match each other', () => {
     const allScores = [
-      0, 1, 50, 99, 100, 101, 250, 499, 500, 501, 700, 849, 850, 851, 900, 999,
-      1000, 1001, 5000, 10000, 50000
+      0, 1, 50, 350, 351, 500, 650, 651, 750, 850, 851, 900, 950, 951, 1000, 5000
     ];
 
     allScores.forEach(score => {
@@ -75,32 +74,32 @@ describe('Tier Consistency Across All Implementations', () => {
   });
 
   describe('Tier threshold boundaries', () => {
-    it('should have consistent Bronze threshold at 100', () => {
-      expect(frontendGetTier(99)).toBe('Novice');
-      expect(frontendGetTier(100)).toBe('Bronze');
-      expect(indexerGetTier(99)).toBe('Novice');
-      expect(indexerGetTier(100)).toBe('Bronze');
+    it('should have consistent RESIDENT threshold at 351', () => {
+      expect(frontendGetTier(350)).toBe('TOURIST');
+      expect(frontendGetTier(351)).toBe('RESIDENT');
+      expect(indexerGetTier(350)).toBe('TOURIST');
+      expect(indexerGetTier(351)).toBe('RESIDENT');
     });
 
-    it('should have consistent Silver threshold at 500', () => {
-      expect(frontendGetTier(499)).toBe('Bronze');
-      expect(frontendGetTier(500)).toBe('Silver');
-      expect(indexerGetTier(499)).toBe('Bronze');
-      expect(indexerGetTier(500)).toBe('Silver');
+    it('should have consistent BUILDER threshold at 651', () => {
+      expect(frontendGetTier(650)).toBe('RESIDENT');
+      expect(frontendGetTier(651)).toBe('BUILDER');
+      expect(indexerGetTier(650)).toBe('RESIDENT');
+      expect(indexerGetTier(651)).toBe('BUILDER');
     });
 
-    it('should have consistent Gold threshold at 850', () => {
-      expect(frontendGetTier(849)).toBe('Silver');
-      expect(frontendGetTier(850)).toBe('Gold');
-      expect(indexerGetTier(849)).toBe('Silver');
-      expect(indexerGetTier(850)).toBe('Gold');
+    it('should have consistent BASED threshold at 851', () => {
+      expect(frontendGetTier(850)).toBe('BUILDER');
+      expect(frontendGetTier(851)).toBe('BASED');
+      expect(indexerGetTier(850)).toBe('BUILDER');
+      expect(indexerGetTier(851)).toBe('BASED');
     });
 
-    it('should have consistent BASED threshold at 1000', () => {
-      expect(frontendGetTier(999)).toBe('Gold');
-      expect(frontendGetTier(1000)).toBe('BASED');
-      expect(indexerGetTier(999)).toBe('Gold');
-      expect(indexerGetTier(1000)).toBe('BASED');
+    it('should have consistent LEGEND threshold at 951', () => {
+      expect(frontendGetTier(950)).toBe('BASED');
+      expect(frontendGetTier(951)).toBe('LEGEND');
+      expect(indexerGetTier(950)).toBe('BASED');
+      expect(indexerGetTier(951)).toBe('LEGEND');
     });
   });
 });

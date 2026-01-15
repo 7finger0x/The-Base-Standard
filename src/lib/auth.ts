@@ -7,6 +7,7 @@
 
 import NextAuth from 'next-auth';
 import type { NextAuthConfig } from 'next-auth';
+import type { User } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { PrismaAdapter } from '@auth/prisma-adapter';
 import { prisma } from './db';
@@ -84,6 +85,7 @@ const siweProvider = CredentialsProvider({
  * NextAuth configuration (v5)
  */
 export const authConfig: NextAuthConfig = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   adapter: PrismaAdapter(prisma) as any,
   providers: [siweProvider],
   session: {
@@ -95,15 +97,17 @@ export const authConfig: NextAuthConfig = {
     error: '/',
   },
   callbacks: {
-    async jwt({ token, user, account }: { token: any; user?: any; account?: any }) {
+    async jwt({ token, user }) {
       // Initial sign in
-      if (user && account) {
+      if (user) {
         token.id = user.id;
-        token.address = account?.address || user.id;
+        // For Credentials provider, get address from user object (set in authorize)
+        const userWithAddress = user as User & { address?: string };
+        token.address = userWithAddress.address || user.id;
       }
       return token;
     },
-    async session({ session, token }: { session: any; token: any }) {
+    async session({ session, token }) {
       if (session.user) {
         session.user.id = token.id as string;
         session.user.address = token.address as string;
@@ -113,7 +117,7 @@ export const authConfig: NextAuthConfig = {
   },
   secret: process.env.NEXTAUTH_SECRET || process.env.NEXTAUTH_URL || 'change-me-in-production',
   debug: process.env.NODE_ENV === 'development',
-};
+} as NextAuthConfig;
 
 /**
  * Export auth function for server-side usage

@@ -5,6 +5,7 @@ import { success, error, Errors } from '@/lib/api-utils';
 import { RequestLogger } from '@/lib/request-logger';
 import { addCorsHeaders } from '@/lib/cors';
 import { getUserIdFromRequest } from '@/lib/session';
+import { identityNonceQuerySchema } from '@/lib/validation/schemas';
 
 /**
  * GET /api/identity/nonce
@@ -14,9 +15,25 @@ export async function GET(request: NextRequest) {
   const startTime = Date.now();
   
   try {
+    // Validate query parameters with Zod
+    const { searchParams } = new URL(request.url);
+    const validationResult = identityNonceQuerySchema.safeParse({
+      address: searchParams.get('address'),
+    });
+
+    if (!validationResult.success) {
+      const response = NextResponse.json(
+        error(Errors.INVALID_INPUT(validationResult.error.issues[0]?.message || 'Invalid address parameter')),
+        { status: 400 }
+      );
+      addCorsHeaders(response, request.headers.get('origin'));
+      RequestLogger.logRequest(request, 400, Date.now() - startTime);
+      return response;
+    }
+
     // Optional: Get userId from session if authenticated
     const userId = await getUserIdFromRequest(request) || undefined;
-    const address = request.nextUrl.searchParams.get('address') || undefined;
+    const address = validationResult.data.address;
 
     const nonce = await IdentityService.generateNonce(
       userId,

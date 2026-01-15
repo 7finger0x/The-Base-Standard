@@ -1,9 +1,25 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { GET } from '@/app/api/reputation/route';
 import { NextRequest } from 'next/server';
+
+// Mock environment variables
+process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test';
+
+// Mock db module before importing route
+vi.mock('@/lib/db', () => {
+  const mockPrisma = {
+    user: { findUnique: vi.fn(), create: vi.fn() },
+    wallet: { findUnique: vi.fn(), create: vi.fn() },
+    $queryRaw: vi.fn(),
+  };
+  return {
+    prisma: mockPrisma,
+  };
+});
 
 // Mock fetch
 global.fetch = vi.fn();
+
+import { GET } from '@/app/api/reputation/route';
 
 describe('Reputation API Route', () => {
   beforeEach(() => {

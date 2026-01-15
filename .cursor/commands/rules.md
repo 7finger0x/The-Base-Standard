@@ -6,7 +6,7 @@
 
 # Core Frameworks
 - Frontend: Next.js 15 (App Router), React 19, TypeScript (Strict)
-- Styling: Tailwind CSS 4.0 (Utility-first)
+- Styling: Tailwind CSS 3.4+ (Utility-first) - Note: 4.0 upgrade planned for Q2 2026
 - Web3: OnchainKit, wagmi v2, viem
 - Database: Prisma ORM
 - Smart Contracts: Foundry (Solidity 0.8.23)

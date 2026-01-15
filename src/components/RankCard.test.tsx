@@ -24,7 +24,9 @@ describe('RankCard', () => {
   });
 
   it('renders connect wallet message when not connected', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(useAccount).mockReturnValue({ address: undefined } as any);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(useReputation).mockReturnValue({ data: undefined, isLoading: false } as any);
 
     render(<RankCard />);
@@ -33,7 +35,9 @@ describe('RankCard', () => {
   });
 
   it('renders loading state', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(useAccount).mockReturnValue({ address: '0x123' } as any);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(useReputation).mockReturnValue({ data: undefined, isLoading: true } as any);
 
     render(<RankCard />);
@@ -44,10 +48,12 @@ describe('RankCard', () => {
   });
 
   it('renders rank and score data correctly when connected', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(useAccount).mockReturnValue({ address: '0x123' } as any);
     vi.mocked(useReputation).mockReturnValue({ 
       data: MOCK_REPUTATION_RESPONSE.data, 
       isLoading: false 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
     render(<RankCard />);

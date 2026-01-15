@@ -20,7 +20,9 @@ describe('ScoreBreakdown', () => {
   });
 
   it('renders loading state', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(useAccount).mockReturnValue({ address: '0x123' } as any);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(useReputation).mockReturnValue({ data: undefined, isLoading: true } as any);
 
     render(<ScoreBreakdown />);
@@ -31,10 +33,12 @@ describe('ScoreBreakdown', () => {
   });
 
   it('renders pillar breakdown correctly', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(useAccount).mockReturnValue({ address: '0x123' } as any);
     vi.mocked(useReputation).mockReturnValue({ 
       data: MOCK_REPUTATION_RESPONSE.data, 
       isLoading: false 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
     render(<ScoreBreakdown />);
@@ -52,6 +56,7 @@ describe('ScoreBreakdown', () => {
   });
 
   it('renders decay warning when applicable', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(useAccount).mockReturnValue({ address: '0x123' } as any);
     
     const decayData = {
@@ -66,6 +71,7 @@ describe('ScoreBreakdown', () => {
     vi.mocked(useReputation).mockReturnValue({ 
       data: decayData, 
       isLoading: false 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
     render(<ScoreBreakdown />);
@@ -76,10 +82,12 @@ describe('ScoreBreakdown', () => {
   });
 
   it('renders multiplier when applicable', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(useAccount).mockReturnValue({ address: '0x123' } as any);
     vi.mocked(useReputation).mockReturnValue({ 
       data: { ...MOCK_REPUTATION_RESPONSE.data, multiplier: 1.5 }, 
       isLoading: false 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
     render(<ScoreBreakdown />);

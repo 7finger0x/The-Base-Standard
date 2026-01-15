@@ -5,6 +5,7 @@ import { success, error, Errors } from '@/lib/api-utils';
 import { RequestLogger } from '@/lib/request-logger';
 import { addCorsHeaders } from '@/lib/cors';
 import { getSession, getUserIdFromRequest } from '@/lib/session';
+import { identityMeQuerySchema } from '@/lib/validation/schemas';
 
 /**
  * GET /api/identity/me
@@ -15,9 +16,25 @@ import { getSession, getUserIdFromRequest } from '@/lib/session';
 export async function GET(request: NextRequest) {
   const startTime = Date.now();
 
+  // Validate query parameters with Zod
+  const { searchParams } = new URL(request.url);
+  const validationResult = identityMeQuerySchema.safeParse({
+    address: searchParams.get('address'),
+  });
+
+  if (!validationResult.success) {
+    const response = NextResponse.json(
+      error(Errors.INVALID_INPUT(validationResult.error.issues[0]?.message || 'Invalid address parameter')),
+      { status: 400 }
+    );
+    addCorsHeaders(response, request.headers.get('origin'));
+    RequestLogger.logRequest(request, 400, Date.now() - startTime);
+    return response;
+  }
+
   // Try to get userId from session or request
   const userId = await getUserIdFromRequest(request);
-  const address = request.nextUrl.searchParams.get('address');
+  const address = validationResult.data.address;
 
   try {
     let identity;

@@ -2,6 +2,9 @@ import { expect, afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import * as matchers from '@testing-library/jest-dom/matchers';
 
+// Mock server-only module for tests
+vi.mock('server-only', () => ({}));
+
 expect.extend(matchers);
 
 afterEach(() => {

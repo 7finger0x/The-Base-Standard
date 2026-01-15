@@ -33,6 +33,7 @@ The Provable Value Contribution (PVC) framework replaces the linear tenure model
 The score (0-1000) is derived from three main pillars, plus multipliers.
 
 ### Pillar 1: Capital Efficiency & Commitment (Max 400 points)
+
 Focuses on economic commitment and efficient usage of capital.
 
 - **Liquidity Duration**: 
@@ -46,6 +47,7 @@ Focuses on economic commitment and efficient usage of capital.
 - **Gas Usage**: Logarithmic scoring based on ETH spent on gas.
 
 ### Pillar 2: Ecosystem Diversity (Max 300 points)
+
 Encourages exploration across the Base ecosystem.
 
 - **Unique Protocols**: 10 points per unique protocol interacted with (Target: 30+).
@@ -53,6 +55,7 @@ Encourages exploration across the Base ecosystem.
 - **Protocol Categories**: Bonus for diversity across DEX, Lending, Gaming, NFT, etc.
 
 ### Pillar 3: Identity & Social Proof (Max 300 points)
+
 Leverages on-chain identity and social graphs for Sybil resistance.
 
 - **Farcaster Integration**:
@@ -112,6 +115,7 @@ Where:
 - Metrics collection structure
 
 ### 🚧 In Progress
+
 - On-chain data collection
 - Zora API integration
 - Farcaster OpenRank integration
@@ -119,6 +123,7 @@ Where:
 - Gitcoin Passport API
 
 ### 📋 Planned
+
 - The Graph subgraph for historical data
 - Merkle proof system for on-chain scores
 - DAO governance for weight adjustments
@@ -142,5 +147,6 @@ Where:
 ---
 
 **For technical implementation details, see:**
+
 - `src/lib/scoring/pvc-framework.ts`
 - `src/lib/scoring/metrics-collector.ts`

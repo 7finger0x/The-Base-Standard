@@ -97,7 +97,8 @@ The Base ecosystem has grown 30x in revenue from 2023 to 2025, making legacy tie
 - **Maximum Decay**: 50% (after 300 days)
 - **Implication**: BASED users cannot retire - must remain active
 
-**Formula**:
+**Formula:**
+
 ```
 decayMultiplier = 1.0 - min(0.5, (daysSinceLastActivity / 30) * 0.05)
 ```
@@ -210,6 +211,7 @@ Where:
 ```
 
 ### Tier Determination
+
 ```typescript
 if (score >= 951) return 'LEGEND';    // Top 1%
 if (score >= 851) return 'BASED';    // Top 5% (hard gate)
@@ -237,6 +239,7 @@ return 'TOURIST';                     // Bottom 40%
 ---
 
 **For implementation details, see:**
+
 - `src/lib/scoring/pvc-framework.ts`
 - `src/lib/scoring/metrics-collector.ts`
 

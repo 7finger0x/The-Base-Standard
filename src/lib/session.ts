@@ -47,7 +47,7 @@ export async function getUserIdFromRequest(request: NextRequest): Promise<string
     if (session?.user?.id) {
       return session.user.id;
     }
-  } catch (error) {
+  } catch {
     // Session check failed, continue to fallback
   }
   
@@ -74,6 +74,6 @@ export async function requireAuth(): Promise<{ userId: string; address?: string 
   
   return {
     userId: session.user.id,
-    address: (session.user as any).address,
+    address: session.user.address,
   };
 }

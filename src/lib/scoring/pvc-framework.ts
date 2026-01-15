@@ -1,3 +1,5 @@
+import 'server-only';
+
 /**
  * Provable Value Contribution (PVC) Framework
  * 
@@ -140,9 +142,9 @@ export class PVCFramework {
     const diversityPillar = this.calculateDiversityPillar(metrics);
     const identityPillar = this.calculateIdentityPillar(metrics, cardScores);
     
-    // Legacy economic/social for backward compatibility
-    const economicVector = this.calculateEconomicVector(metrics);
-    const socialVector = this.calculateSocialVector(metrics, cardScores);
+    // Legacy economic/social for backward compatibility (calculated but not used in current scoring)
+    this.calculateEconomicVector(metrics);
+    this.calculateSocialVector(metrics, cardScores);
     
     // Calculate Sybil resistance multiplier
     const multiplier = this.calculateMultiplier(metrics);

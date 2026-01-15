@@ -50,3 +50,5 @@ yarn-error.log*
 .vercel
 
 /src/generated/prisma
+
+.vercel

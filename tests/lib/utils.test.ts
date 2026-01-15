@@ -58,49 +58,49 @@ describe('formatScore', () => {
 });
 
 describe('getTierFromScore', () => {
-  it('should return Novice for score 0', () => {
-    expect(getTierFromScore(0)).toBe('Novice');
+  it('should return TOURIST for score 0', () => {
+    expect(getTierFromScore(0)).toBe('TOURIST');
   });
 
-  it('should return Novice for scores below 100', () => {
-    expect(getTierFromScore(50)).toBe('Novice');
-    expect(getTierFromScore(99)).toBe('Novice');
+  it('should return TOURIST for scores below 351', () => {
+    expect(getTierFromScore(50)).toBe('TOURIST');
+    expect(getTierFromScore(350)).toBe('TOURIST');
   });
 
-  it('should return Bronze for score 100', () => {
-    expect(getTierFromScore(100)).toBe('Bronze');
+  it('should return RESIDENT for score 351', () => {
+    expect(getTierFromScore(351)).toBe('RESIDENT');
   });
 
-  it('should return Bronze for scores 100-499', () => {
-    expect(getTierFromScore(250)).toBe('Bronze');
-    expect(getTierFromScore(499)).toBe('Bronze');
+  it('should return RESIDENT for scores 351-650', () => {
+    expect(getTierFromScore(500)).toBe('RESIDENT');
+    expect(getTierFromScore(650)).toBe('RESIDENT');
   });
 
-  it('should return Silver for score 500', () => {
-    expect(getTierFromScore(500)).toBe('Silver');
+  it('should return BUILDER for score 651', () => {
+    expect(getTierFromScore(651)).toBe('BUILDER');
   });
 
-  it('should return Silver for scores 500-849', () => {
-    expect(getTierFromScore(700)).toBe('Silver');
-    expect(getTierFromScore(849)).toBe('Silver');
+  it('should return BUILDER for scores 651-850', () => {
+    expect(getTierFromScore(700)).toBe('BUILDER');
+    expect(getTierFromScore(850)).toBe('BUILDER');
   });
 
-  it('should return Gold for score 850', () => {
-    expect(getTierFromScore(850)).toBe('Gold');
+  it('should return BASED for score 851', () => {
+    expect(getTierFromScore(851)).toBe('BASED');
   });
 
-  it('should return Gold for scores 850-999', () => {
-    expect(getTierFromScore(900)).toBe('Gold');
-    expect(getTierFromScore(999)).toBe('Gold');
+  it('should return BASED for scores 851-950', () => {
+    expect(getTierFromScore(900)).toBe('BASED');
+    expect(getTierFromScore(950)).toBe('BASED');
   });
 
-  it('should return BASED for score 1000', () => {
-    expect(getTierFromScore(1000)).toBe('BASED');
+  it('should return LEGEND for score 951', () => {
+    expect(getTierFromScore(951)).toBe('LEGEND');
   });
 
-  it('should return BASED for scores above 1000', () => {
-    expect(getTierFromScore(5000)).toBe('BASED');
-    expect(getTierFromScore(10000)).toBe('BASED');
+  it('should return LEGEND for scores above 951', () => {
+    expect(getTierFromScore(1000)).toBe('LEGEND');
+    expect(getTierFromScore(5000)).toBe('LEGEND');
   });
 });
 

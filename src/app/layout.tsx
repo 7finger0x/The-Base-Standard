@@ -3,7 +3,25 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Providers } from './providers';
 import './globals.css';
 
+// Determine the base URL for metadata (social images)
+const getMetadataBase = (): URL => {
+  // Production: Use explicit URL or Vercel URL
+  if (process.env.NEXT_PUBLIC_APP_URL) {
+    return new URL(process.env.NEXT_PUBLIC_APP_URL);
+  }
+  if (process.env.VERCEL_URL) {
+    return new URL(`https://${process.env.VERCEL_URL}`);
+  }
+  // Fallback to production URL
+  if (process.env.NODE_ENV === 'production') {
+    return new URL('https://tbs-alpha.vercel.app');
+  }
+  // Development: Use localhost
+  return new URL('http://localhost:3000');
+};
+
 export const metadata: Metadata = {
+  metadataBase: getMetadataBase(),
   title: 'The Base Standard',
   description: 'Your on-chain reputation score across Base and Zora - The Standard for Base L2',
   icons: {

@@ -122,11 +122,28 @@ npm run test:endpoints [base-url]
 
 ## Documentation
 
+### User & Developer Guides
 - [User Guide](./docs/USER_GUIDE.md) - End-user documentation
 - [API Documentation](./docs/API_DOCUMENTATION.md) - API reference
-- [Deployment Runbook](./docs/DEPLOYMENT_RUNBOOK.md) - Deployment procedures
+- [Project Summary](./docs/PROJECT_SUMMARY.md) - High-level project overview
+
+### Deployment & Operations
+- [Quick Start Production](./docs/deployment/QUICK_START_PRODUCTION.md) - 5-minute deployment guide
+- [Deployment Runbook](./docs/DEPLOYMENT_RUNBOOK.md) - Detailed deployment procedures
+- [Production Checklist](./docs/deployment/PRODUCTION_CHECKLIST.md) - Pre-deployment checklist
+- [Production Project Paper](./docs/deployment/PRODUCTION_PROJECT_PAPER.md) - Technical specification
 - [Incident Response](./docs/INCIDENT_RESPONSE.md) - Incident handling
-- [Production Checklist](./PRODUCTION_CHECKLIST.md) - Pre-deployment checklist
+
+### Technical Documentation
+- [PVC Framework](./docs/PVC_FRAMEWORK.md) - Scoring system framework
+- [Tier Recalibration](./docs/TIER_RECALIBRATION.md) - Tier system design
+- [Identity System](./docs/IDENTITY_SYSTEM.md) - Multi-wallet identity
+- [Environment Variables](./docs/ENV_VARIABLES.md) - Configuration guide
+
+### Status & History
+- [Project Status](./docs/PROJECT_STATUS.md) - Current completion status
+- [Implementation Status](./docs/status/) - Historical implementation summaries
+- [Documentation Index](./docs/DOCUMENTATION_INDEX.md) - Complete documentation catalog
 
 ## Production URLs
 

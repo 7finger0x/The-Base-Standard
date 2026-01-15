@@ -8,7 +8,6 @@
 import { prisma } from '@/lib/db';
 import type { Address } from 'viem';
 import { verifySIWESignature, parseSIWEMessage, validateSIWEMessage } from './siwe';
-import { Errors } from '@/lib/api-utils';
 import { RequestLogger } from '@/lib/request-logger';
 
 export interface LinkWalletRequest {
@@ -312,7 +311,7 @@ export class IdentityService {
     } catch (error) {
       RequestLogger.logError('Link social account error', error, {
         operation: 'linkSocialAccount',
-        userId: request.userId,
+        userId,
         provider: request.provider,
       });
       return {
@@ -453,7 +452,23 @@ export class IdentityService {
    * Create or get user from wallet address
    * Used for initial wallet connection
    */
-  static async createOrGetUserFromWallet(address: Address): Promise<{ user: any; isNew: boolean }> {
+  static async createOrGetUserFromWallet(address: Address): Promise<{ 
+    user: {
+      id: string;
+      username: string | null;
+      displayName: string | null;
+      avatarUrl: string | null;
+      bio: string | null;
+      score: number;
+      rank: number;
+      tier: string;
+      address: string | null;
+      createdAt: Date;
+      updatedAt: Date;
+      lastUpdated: Date;
+    }; 
+    isNew: boolean 
+  }> {
     // Check if wallet exists
     const existingWallet = await prisma.wallet.findUnique({
       where: {

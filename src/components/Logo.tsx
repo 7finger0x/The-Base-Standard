@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 interface LogoProps {
@@ -35,10 +34,6 @@ export function Logo({ variant = 'icon', size = 'md', className, showText = true
     lg: 'text-2xl',
     xl: 'text-4xl',
   };
-
-  // Try to use actual logo files if they exist
-  // In production, these will be available from /public/
-  const logoSrc = variant === 'full' ? '/logo.svg' : '/logo-icon.svg';
 
   return (
     <div className={cn('flex items-center gap-3', className)}>

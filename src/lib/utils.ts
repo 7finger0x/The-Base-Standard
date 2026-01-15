@@ -69,15 +69,14 @@ export async function resolveBaseName(address: string): Promise<string | null> {
     });
 
     // Step 1: Get the reverse node from Reverse Registrar
-    let node: `0x${string}`;
     try {
-      node = await client.readContract({
+      await client.readContract({
         address: BASE_NAMES_REVERSE_REGISTRAR,
         abi: REVERSE_REGISTRAR_ABI,
         functionName: 'node',
         args: [normalizedAddress],
       });
-    } catch (error) {
+    } catch {
       // If reverse node lookup fails, address doesn't have a name
       return null;
     }
@@ -97,7 +96,7 @@ export async function resolveBaseName(address: string): Promise<string | null> {
       }
 
       return null;
-    } catch (error) {
+    } catch {
       // Resolver query failed, address may not have a name
       return null;
     }
@@ -116,25 +115,6 @@ export async function resolveBaseName(address: string): Promise<string | null> {
  */
 export async function reverseResolveBaseName(name: string): Promise<string | null> {
   try {
-    // Remove .base.eth suffix if present
-    const normalizedName = name.replace(/\.base\.eth$/, '');
-    
-    const client = createPublicClient({
-      chain: base,
-      transport: http(BASE_RPC_URL, { timeout: 10000 }),
-    });
-
-    // ENS resolver ABI for addr() function
-    const ADDR_RESOLVER_ABI = [
-      {
-        name: 'addr',
-        type: 'function',
-        stateMutability: 'view',
-        inputs: [{ name: 'node', type: 'bytes32' }],
-        outputs: [{ name: '', type: 'address' }],
-      },
-    ] as const;
-
     // Note: This requires the full ENS namehash calculation
     // For now, return null as full implementation requires namehash library
     // In production, use @ensdomains/ensjs or calculate namehash manually

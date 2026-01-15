@@ -6,17 +6,27 @@ import { dbService } from '@/lib/database-service';
 import { RequestLogger } from '@/lib/request-logger';
 import { addCorsHeaders } from '@/lib/cors';
 import { calculateReputationScore } from '@/lib/scoring';
+import { reputationQuerySchema } from '@/lib/validation/schemas';
 
 export async function GET(request: NextRequest) {
   const startTime = Date.now();
   let statusCode = 200;
   let errorObj: Error | undefined;
   const { searchParams } = new URL(request.url);
-  const address = searchParams.get('address');
 
-  // Validate address parameter
-  if (!address) {
+  // Validate query parameters with Zod
+  const validationResult = reputationQuerySchema.safeParse({
+    address: searchParams.get('address'),
+  });
+
+  if (!validationResult.success) {
     statusCode = 400;
+    RequestLogger.logSecurityEvent({
+      type: 'invalid_input',
+      path: request.nextUrl.pathname,
+      ip: request.headers.get('x-forwarded-for') || 'unknown',
+      details: { validationErrors: validationResult.error.issues },
+    });
     const response = NextResponse.json(
       error(Errors.WALLET_REQUIRED()),
       { status: 400 }
@@ -26,29 +36,13 @@ export async function GET(request: NextRequest) {
     return response;
   }
 
-  // Validate wallet address format
-  if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
-    statusCode = 400;
-    RequestLogger.logSecurityEvent({
-      type: 'invalid_input',
-      path: request.nextUrl.pathname,
-      ip: request.headers.get('x-forwarded-for') || 'unknown',
-      details: { address },
-    });
-    const response = NextResponse.json(
-      error(Errors.WALLET_INVALID()),
-      { status: 400 }
-    );
-    addCorsHeaders(response, request.headers.get('origin'));
-    RequestLogger.logRequest(request, statusCode, Date.now() - startTime);
-    return response;
-  }
+  const { address } = validationResult.data;
 
   try {
     // Check if Ponder service is configured and healthy
     if (isServiceConfigured('ponder')) {
       try {
-        const ponderResponse = await fetch(`${PONDER_URL}/api/reputation/${address.toLowerCase()}`, {
+        const ponderResponse = await fetch(`${PONDER_URL}/api/reputation/${address}`, {
           next: { revalidate: 5 }, // Cache for 5 seconds
         });
 
@@ -61,7 +55,7 @@ export async function GET(request: NextRequest) {
         }
       } catch (error) {
         RequestLogger.logWarning('Ponder service unavailable', {
-          address: address.toLowerCase(),
+          address: address,
           error: error instanceof Error ? error.message : 'Unknown error',
         });
       }
@@ -76,7 +70,7 @@ export async function GET(request: NextRequest) {
         const rankData = await dbService.getUserRank(address);
         
         const response = NextResponse.json(success({
-          address: address.toLowerCase(),
+          address: address,
           totalScore: pvcScore.totalScore,
           tier: pvcScore.tier,
           rank: rankData?.rank,
@@ -98,7 +92,7 @@ export async function GET(request: NextRequest) {
         return response;
       } catch (pvcError) {
         RequestLogger.logWarning('PVC scoring failed, falling back to legacy', {
-          address: address.toLowerCase(),
+          address: address,
           error: pvcError instanceof Error ? pvcError.message : 'Unknown error',
         });
         // Fall through to legacy scoring
@@ -160,7 +154,7 @@ export async function GET(request: NextRequest) {
 
 function generateMockScore(address: string) {
   // Generate deterministic mock data based on address (PVC format)
-  const hash = address.toLowerCase().split('').reduce((a, b) => {
+  const hash = address.split('').reduce((a, b) => {
     return a + b.charCodeAt(0);
   }, 0);
 

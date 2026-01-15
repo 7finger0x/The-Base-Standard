@@ -82,7 +82,16 @@ export function ScoreBreakdown() {
   );
 }
 
-function PillarCard({ title, score, max, icon, color, description }: any) {
+interface PillarCardProps {
+  title: string;
+  score: number;
+  max: number;
+  icon: string;
+  color: string;
+  description: string;
+}
+
+function PillarCard({ title, score, max, icon, color, description }: PillarCardProps) {
   const percentage = Math.min(100, (score / max) * 100);
   
   return (

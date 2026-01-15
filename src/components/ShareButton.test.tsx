@@ -21,7 +21,9 @@ Object.assign(navigator, {
 
 describe('ShareButton', () => {
   it('renders nothing when no reputation data', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(useAccount).mockReturnValue({ address: '0x123' } as any);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(useReputation).mockReturnValue({ data: undefined } as any);
     
     const { container } = render(<ShareButton />);
@@ -29,9 +31,11 @@ describe('ShareButton', () => {
   });
 
   it('renders share buttons when data exists', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(useAccount).mockReturnValue({ address: '0x123' } as any);
     vi.mocked(useReputation).mockReturnValue({ 
       data: { totalScore: 850, tier: 'BASED' } 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
     render(<ShareButton />);
@@ -42,9 +46,11 @@ describe('ShareButton', () => {
   });
 
   it('copies to clipboard', () => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(useAccount).mockReturnValue({ address: '0x123' } as any);
     vi.mocked(useReputation).mockReturnValue({ 
       data: { totalScore: 850, tier: 'BASED' } 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any);
 
     render(<ShareButton />);

@@ -19,6 +19,7 @@ The Base Standard is an on-chain reputation system that quantifies your activity
 ### 2. View Your Reputation Score
 
 Once connected, you'll see:
+
 - **Total Score**: Your overall reputation points
 - **Tier**: Your current tier (Novice, Bronze, Silver, Gold, BASED)
 - **Rank**: Your position on the leaderboard
@@ -61,11 +62,12 @@ You can link multiple wallets to aggregate your reputation score:
 3. The secondary wallet's score will be added to your main wallet
 4. Maximum 5 wallets can be linked per account
 
-**Security**: Wallet linking uses cryptographic signatures (EIP-712) - your private keys never leave your wallet.
+**Security:** Wallet linking uses cryptographic signatures (EIP-712) - your private keys never leave your wallet.
 
 ## Leaderboard
 
 View the top users by reputation score:
+
 - Navigate to the Leaderboard page
 - See rankings, scores, and tiers
 - Use pagination to browse through rankings

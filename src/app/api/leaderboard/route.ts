@@ -2,14 +2,32 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { RequestLogger } from '@/lib/request-logger';
 import { addCorsHeaders } from '@/lib/cors';
+import { leaderboardQuerySchema } from '@/lib/validation/schemas';
+import { error, Errors } from '@/lib/api-utils';
 
 const PONDER_URL = process.env.PONDER_URL || 'http://localhost:42069';
 
 export async function GET(request: NextRequest) {
   const startTime = Date.now();
   const { searchParams } = new URL(request.url);
-  const limit = parseInt(searchParams.get('limit') || '100');
-  const offset = parseInt(searchParams.get('offset') || '0');
+
+  // Validate query parameters with Zod
+  const validationResult = leaderboardQuerySchema.safeParse({
+    limit: searchParams.get('limit'),
+    offset: searchParams.get('offset'),
+  });
+
+  if (!validationResult.success) {
+    const response = NextResponse.json(
+      error(Errors.INVALID_INPUT(validationResult.error.issues[0]?.message || 'Invalid pagination parameters')),
+      { status: 400 }
+    );
+    addCorsHeaders(response, request.headers.get('origin'));
+    RequestLogger.logRequest(request, 400, Date.now() - startTime);
+    return response;
+  }
+
+  const { limit, offset } = validationResult.data;
 
   try {
     // Try to fetch from Ponder indexer
@@ -67,17 +85,13 @@ function generateMockLeaderboard(limit: number, offset: number) {
   });
 
   return {
-    success: true,
-    data: {
-      leaderboard,
-      pagination: {
-        limit,
-        offset,
-        hasMore: offset + limit < 1000,
-        total: 10000,
-      },
+    leaderboard,
+    pagination: {
+      limit,
+      offset,
+      hasMore: offset + limit < 1000,
+      total: 10000,
     },
-    timestamp: new Date().toISOString(),
   };
 }
 

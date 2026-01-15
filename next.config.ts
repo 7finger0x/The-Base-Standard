@@ -16,6 +16,19 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  webpack: (config) => {
+    // Ignore Node.js-specific modules that Web3 libraries try to import
+    config.externals = config.externals || [];
+    config.externals.push('pino-pretty', 'lokijs', 'encoding');
+
+    // Ignore React Native Async Storage (used by MetaMask SDK)
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@react-native-async-storage/async-storage': false,
+    };
+
+    return config;
+  },
   async headers() {
     return [
       {

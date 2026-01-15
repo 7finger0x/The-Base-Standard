@@ -17,7 +17,7 @@ describe('Score Calculation Integration', () => {
       const tier = getTierFromScore(totalScore);
 
       expect(totalScore).toBe(0);
-      expect(tier).toBe('Novice');
+      expect(tier).toBe('TOURIST');
     });
 
     it('should calculate correct score for active user', () => {
@@ -29,10 +29,10 @@ describe('Score Calculation Integration', () => {
       const tier = getTierFromScore(totalScore);
 
       expect(totalScore).toBe(180); // 30 + 50 + 100
-      expect(tier).toBe('Bronze');
+      expect(tier).toBe('TOURIST');
     });
 
-    it('should reach Silver tier with moderate activity', () => {
+    it('should reach RESIDENT tier with moderate activity', () => {
       const baseTenure = 100; // 100 days
       const zoraMints = 20; // 20 mints
       const earlyMints = 2; // 2 early mints
@@ -41,10 +41,10 @@ describe('Score Calculation Integration', () => {
       const tier = getTierFromScore(totalScore);
 
       expect(totalScore).toBe(500); // 100 + 200 + 200
-      expect(tier).toBe('Silver');
+      expect(tier).toBe('RESIDENT');
     });
 
-    it('should reach Gold tier with high activity', () => {
+    it('should reach BUILDER tier with high activity', () => {
       const baseTenure = 250; // 250 days
       const zoraMints = 40; // 40 mints
       const earlyMints = 2; // 2 early mints
@@ -53,10 +53,10 @@ describe('Score Calculation Integration', () => {
       const tier = getTierFromScore(totalScore);
 
       expect(totalScore).toBe(850); // 250 + 400 + 200
-      expect(tier).toBe('Gold');
+      expect(tier).toBe('BUILDER');
     });
 
-    it('should reach BASED tier with exceptional activity', () => {
+    it('should reach LEGEND tier with exceptional activity', () => {
       const baseTenure = 365; // 1 year
       const zoraMints = 50; // 50 mints
       const earlyMints = 2; // 2 early mints
@@ -65,10 +65,10 @@ describe('Score Calculation Integration', () => {
       const tier = getTierFromScore(totalScore);
 
       expect(totalScore).toBe(1065); // 365 + 500 + 200
-      expect(tier).toBe('BASED');
+      expect(tier).toBe('LEGEND');
     });
 
-    it('should reach BASED tier through early minting alone', () => {
+    it('should reach LEGEND tier through early minting alone', () => {
       const baseTenure = 0;
       const zoraMints = 10; // 10 regular mints
       const earlyMints = 10; // 10 early mints
@@ -77,7 +77,7 @@ describe('Score Calculation Integration', () => {
       const tier = getTierFromScore(totalScore);
 
       expect(totalScore).toBe(1100); // 0 + 100 + 1000
-      expect(tier).toBe('BASED');
+      expect(tier).toBe('LEGEND');
     });
 
     it('should handle linked wallet score aggregation', () => {
@@ -104,7 +104,7 @@ describe('Score Calculation Integration', () => {
 
       // 150 (baseTenure) + 150 (zoraMints) + 200 (earlyMints) = 500
       expect(totalScore).toBe(500);
-      expect(tier).toBe('Silver');
+      expect(tier).toBe('RESIDENT');
     });
   });
 
@@ -118,21 +118,21 @@ describe('Score Calculation Integration', () => {
       const tier = getTierFromScore(totalScore);
 
       expect(totalScore).toBe(15730); // 730 + 10000 + 5000
-      expect(tier).toBe('BASED');
+      expect(tier).toBe('LEGEND');
     });
 
     it('should handle score at exact tier boundaries', () => {
-      expect(getTierFromScore(100)).toBe('Bronze');
-      expect(getTierFromScore(500)).toBe('Silver');
-      expect(getTierFromScore(850)).toBe('Gold');
-      expect(getTierFromScore(1000)).toBe('BASED');
+      expect(getTierFromScore(351)).toBe('RESIDENT');
+      expect(getTierFromScore(651)).toBe('BUILDER');
+      expect(getTierFromScore(851)).toBe('BASED');
+      expect(getTierFromScore(951)).toBe('LEGEND');
     });
 
     it('should handle score just below tier boundaries', () => {
-      expect(getTierFromScore(99)).toBe('Novice');
-      expect(getTierFromScore(499)).toBe('Bronze');
-      expect(getTierFromScore(849)).toBe('Silver');
-      expect(getTierFromScore(999)).toBe('Gold');
+      expect(getTierFromScore(350)).toBe('TOURIST');
+      expect(getTierFromScore(650)).toBe('RESIDENT');
+      expect(getTierFromScore(850)).toBe('BUILDER');
+      expect(getTierFromScore(950)).toBe('BASED');
     });
   });
 

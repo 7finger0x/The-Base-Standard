@@ -1,9 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useAccount } from 'wagmi';
 import { useIdentity, useUnlinkWallet, useSetPrimaryWallet } from '@/hooks/useIdentity';
-import { useNameResolution } from '@/hooks/useNameResolution';
 import { shortenAddress } from '@/lib/utils';
 
 type Wallet = {
@@ -16,12 +14,10 @@ type Wallet = {
 };
 
 export function WalletList() {
-  const { address } = useAccount();
   const { data: identity, isLoading } = useIdentity();
   const { mutate: unlinkWallet, isPending: isUnlinking } = useUnlinkWallet();
   const { mutate: setPrimary, isPending: isSettingPrimary } = useSetPrimaryWallet();
   const [showLinkModal, setShowLinkModal] = useState(false);
-  const { baseName: primaryBaseName } = useNameResolution();
 
   if (isLoading) {
     return (

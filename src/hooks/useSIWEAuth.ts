@@ -8,7 +8,6 @@ import { useMutation } from '@tanstack/react-query';
 import { useAccount, useSignMessage } from 'wagmi';
 import { signIn } from 'next-auth/react';
 import { generateSIWEMessage } from '@/lib/identity/siwe';
-import type { Address } from 'viem';
 
 /**
  * Hook to sign in with Ethereum wallet

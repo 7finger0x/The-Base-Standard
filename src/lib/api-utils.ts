@@ -30,6 +30,7 @@ export const Errors = {
   // Custom errors
   WALLET_REQUIRED: () => new ApiError(400, 'Wallet address is required', 'WALLET_REQUIRED'),
   WALLET_INVALID: () => new ApiError(400, 'Invalid wallet address', 'WALLET_INVALID'),
+  INVALID_INPUT: (message = 'Invalid input') => new ApiError(400, message, 'INVALID_INPUT'),
   DATABASE_ERROR: (message = 'Database operation failed') => 
     new ApiError(500, message, 'DATABASE_ERROR'),
   INDEXER_UNAVAILABLE: () => 

@@ -1,3 +1,5 @@
+import 'server-only';
+
 /**
  * Metrics Collector for PVC Framework
  * 
@@ -11,11 +13,31 @@
  */
 
 import type { PVCMetrics } from './pvc-framework';
-import { createPublicClient, http, type Address, parseAbi, formatUnits } from 'viem';
+import { createPublicClient, http, type Address, parseAbi } from 'viem';
 import { base } from 'viem/chains';
 import { BASE_RPC_URL, PONDER_URL } from '@/lib/env';
 import { env } from '@/lib/env';
 import { RequestLogger } from '@/lib/request-logger';
+
+/**
+ * BaseScan API transaction response format
+ */
+interface BaseScanTransaction {
+  hash: string;
+  timeStamp: string;
+  gasUsed?: string;
+  gasPrice?: string;
+  to?: string;
+  value?: string;
+}
+
+/**
+ * Farcaster link response format
+ */
+interface FarcasterLink {
+  fid: number;
+  targetFid: number;
+}
 
 export interface OnChainData {
   address: string;
@@ -180,10 +202,10 @@ export class MetricsCollector {
         };
       }
 
-      const txs = result.result.slice(0, 1000); // Limit to 1000 most recent
+      const txs = result.result.slice(0, 1000) as BaseScanTransaction[]; // Limit to 1000 most recent
       
       // Convert BaseScan format to our Transaction format
-      const transactions: Transaction[] = txs.map((tx: any) => ({
+      const transactions: Transaction[] = txs.map((tx: BaseScanTransaction) => ({
         hash: tx.hash,
         timestamp: parseInt(tx.timeStamp, 10),
         gasUsed: BigInt(tx.gasUsed || '0'),
@@ -220,6 +242,7 @@ export class MetricsCollector {
    */
   private static async fetchFromRPC(address: Address): Promise<OnChainData> {
     const client = this.getBaseClient();
+    const normalizedAddress = address.toLowerCase();
     
     try {
       // Get current block number
@@ -363,13 +386,10 @@ export class MetricsCollector {
         // Contract deployment - use transaction hash as contract address
         // Note: We'd need the actual deployed address, which requires transaction receipt
         // For now, we'll track deployments separately
-        const deployTx = transactions.find(t => t.hash === tx.hash);
-        if (deployTx) {
-          deployed.set(tx.hash, {
-            deployTimestamp: tx.timestamp,
-            totalGasInduced: 0n, // Would need to query separately
-          });
-        }
+        deployed.set(tx.hash, {
+          deployTimestamp: tx.timestamp,
+          totalGasInduced: 0n, // Would need to query separately
+        });
       }
     });
 
@@ -440,7 +460,6 @@ export class MetricsCollector {
       
       // Extract Zora mint information from reputation breakdown
       const zoraBreakdown = data.breakdown?.zoraMints || {};
-      const mintCount = zoraBreakdown.count || 0;
       const earlyMintCount = zoraBreakdown.earlyMints || 0;
 
       // For full mint details, we'd need to query the mints endpoint or RPC
@@ -462,6 +481,7 @@ export class MetricsCollector {
    */
   private static async fetchZoraFromRPC(address: Address): Promise<ZoraData> {
     const client = this.getBaseClient();
+    const normalizedAddress = address.toLowerCase();
     
     try {
       // Zora Creator 1155 Factory address on Base
@@ -472,7 +492,6 @@ export class MetricsCollector {
       const startBlock = currentBlock > 10000n ? currentBlock - 10000n : 0n; // Last 10k blocks
 
       // TransferSingle event signature: keccak256("TransferSingle(address,address,address,uint256,uint256)")
-      const transferSingleTopic = '0xc3d58168c5ae7397731d063d5bbf3d657854427343f4c083240f7aacaa2d0f62';
       const zeroAddress = '0x0000000000000000000000000000000000000000' as Address;
 
       // Query TransferSingle events with topic filters
@@ -519,7 +538,6 @@ export class MetricsCollector {
           if (args.to?.toLowerCase() !== address.toLowerCase()) continue;
           
           const tokenId = args.id.toString();
-          const quantity = args.value ? Number(args.value) : 1;
           
           collections.add(collectionAddress);
 
@@ -703,16 +721,16 @@ export class MetricsCollector {
       let following = 0;
       
       if (linksResponse?.ok) {
-        const linksData = await linksResponse.json();
+        const linksData = await linksResponse.json() as { result?: { links?: FarcasterLink[] } };
         const links = linksData.result?.links || [];
         
         // Count followers (links where targetFid = our fid)
-        followers = links.filter((link: any) => 
+        followers = links.filter((link: FarcasterLink) => 
           link.targetFid === fid
         ).length;
         
         // Count following (links where fid = our fid)
-        following = links.filter((link: any) => 
+        following = links.filter((link: FarcasterLink) => 
           link.fid === fid
         ).length;
       }
@@ -1039,7 +1057,8 @@ export class MetricsCollector {
   /**
    * Calculate liquidity metrics
    */
-  private static calculateLiquidityMetrics(transactions: Transaction[]): {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private static calculateLiquidityMetrics(_transactions: Transaction[]): {
     durationDays: number;
     positions: number;
     lendingUtilization: number;

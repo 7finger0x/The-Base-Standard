@@ -7,11 +7,11 @@ export const EARLY_MINT_BONUS = 100; // Points per early mint
 
 // Tier thresholds
 export const TIER_THRESHOLDS = {
-  BASED: 1000,
-  Gold: 850,
-  Silver: 500,
-  Bronze: 100,
-  Novice: 0,
+  LEGEND: 951,
+  BASED: 851,
+  BUILDER: 651,
+  RESIDENT: 351,
+  TOURIST: 0,
 } as const;
 
 // ============================================
@@ -19,11 +19,11 @@ export const TIER_THRESHOLDS = {
 // ============================================
 
 export function getTierFromScore(score: number): string {
+  if (score >= TIER_THRESHOLDS.LEGEND) return "LEGEND";
   if (score >= TIER_THRESHOLDS.BASED) return "BASED";
-  if (score >= TIER_THRESHOLDS.Gold) return "Gold";
-  if (score >= TIER_THRESHOLDS.Silver) return "Silver";
-  if (score >= TIER_THRESHOLDS.Bronze) return "Bronze";
-  return "Novice";
+  if (score >= TIER_THRESHOLDS.BUILDER) return "BUILDER";
+  if (score >= TIER_THRESHOLDS.RESIDENT) return "RESIDENT";
+  return "TOURIST";
 }
 
 // ============================================

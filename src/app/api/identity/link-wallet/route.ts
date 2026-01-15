@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
   let auth: { userId: string; address?: string };
   try {
     auth = await requireAuth();
-  } catch (err) {
+  } catch {
     const response = NextResponse.json(
       error(Errors.UNAUTHORIZED('Authentication required')),
       { status: 401 }

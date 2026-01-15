@@ -29,6 +29,7 @@ export function SignInButton({ className }: { className?: string }) {
 
   // If authenticated, show session status and sign-out
   if (isAuthenticated && session?.user) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const userAddress = (session.user as any).address || address;
     return (
       <div className={cn('flex items-center gap-3', className)}>

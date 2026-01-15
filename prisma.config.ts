@@ -1,10 +1,12 @@
-// Prisma configuration file
-// This file is not actually used by Prisma CLI - it uses prisma/schema.prisma directly
-// Keeping this file for potential future use with Prisma 6.x config features
+// Prisma v7 configuration file
+// Connection URL for migrations (moved from schema.prisma)
 
 export default {
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
+  },
+  datasource: {
+    url: process.env.DATABASE_URL || "file:./dev.db",
   },
 };

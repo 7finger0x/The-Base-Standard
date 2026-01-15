@@ -1,5 +1,6 @@
 import { ponder } from "ponder:registry";
 import { account, zoraMint, collection, linkedWallet } from "ponder:schema";
+import { eq } from "ponder:core";
 import { getTierFromScore, isEarlyMint, EARLY_MINT_BONUS } from "./utils";
 
 // ============================================
@@ -13,14 +14,17 @@ ponder.on("ZoraMinterBase:Purchased", async ({ event, context }) => {
   const contractAddress = event.log.address;
 
   // Get or create collection
-  let col = await db.find(collection, { address: contractAddress });
+  let col = await db.query.collection.findFirst({
+    where: eq(collection.address, contractAddress),
+  });
   if (!col) {
-    col = await db.insert(collection).values({
+    const inserted = await db.insert(collection).values({
       address: contractAddress,
       network: "base",
       deployedAt: timestamp, // Approximate - use ContractCreated for accuracy
       totalMints: 0,
     }).returning();
+    col = inserted[0];
   }
 
   // Check if early mint (within 24h of deploy)
@@ -41,9 +45,11 @@ ponder.on("ZoraMinterBase:Purchased", async ({ event, context }) => {
   }).onConflictDoNothing();
 
   // Update collection stats
-  await db.update(collection, { address: contractAddress }).set({
-    totalMints: col.totalMints + Number(quantity),
-  });
+  await db.update(collection)
+    .set({
+      totalMints: col.totalMints + Number(quantity),
+    })
+    .where(eq(collection.address, contractAddress));
 
   // Update minter's account
   await updateMinterScore(db, minter, Number(quantity), early, timestamp);
@@ -62,7 +68,9 @@ ponder.on("ZoraMinterBase:TransferSingle", async ({ event, context }) => {
   const contractAddress = event.log.address;
   
   // Get collection deploy time
-  let col = await db.find(collection, { address: contractAddress });
+  const col = await db.query.collection.findFirst({
+    where: eq(collection.address, contractAddress),
+  });
   const deployedAt = col?.deployedAt ?? timestamp;
   const early = isEarlyMint(timestamp, deployedAt);
 
@@ -92,14 +100,17 @@ ponder.on("ZoraMinterZora:Purchased", async ({ event, context }) => {
   const timestamp = Number(event.block.timestamp);
   const contractAddress = event.log.address;
 
-  let col = await db.find(collection, { address: contractAddress });
+  let col = await db.query.collection.findFirst({
+    where: eq(collection.address, contractAddress),
+  });
   if (!col) {
-    col = await db.insert(collection).values({
+    const inserted = await db.insert(collection).values({
       address: contractAddress,
       network: "zora",
       deployedAt: timestamp,
       totalMints: 0,
     }).returning();
+    col = inserted[0];
   }
 
   const early = isEarlyMint(timestamp, col.deployedAt);
@@ -117,9 +128,11 @@ ponder.on("ZoraMinterZora:Purchased", async ({ event, context }) => {
     collectionDeployedAt: col.deployedAt,
   }).onConflictDoNothing();
 
-  await db.update(collection, { address: contractAddress }).set({
-    totalMints: col.totalMints + Number(quantity),
-  });
+  await db.update(collection)
+    .set({
+      totalMints: col.totalMints + Number(quantity),
+    })
+    .where(eq(collection.address, contractAddress));
 
   await updateMinterScore(db, minter, Number(quantity), early, timestamp);
 
@@ -134,7 +147,9 @@ ponder.on("ZoraMinterZora:TransferSingle", async ({ event, context }) => {
   if (from !== "0x0000000000000000000000000000000000000000") return;
 
   const contractAddress = event.log.address;
-  let col = await db.find(collection, { address: contractAddress });
+  const col = await db.query.collection.findFirst({
+    where: eq(collection.address, contractAddress),
+  });
   const deployedAt = col?.deployedAt ?? timestamp;
   const early = isEarlyMint(timestamp, deployedAt);
 
@@ -158,22 +173,28 @@ ponder.on("ZoraMinterZora:TransferSingle", async ({ event, context }) => {
 // HELPER FUNCTIONS
 // ============================================
 
+// Helper function to update minter score
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function updateMinterScore(
-  db: any,
+  db: any, // Ponder context.db type - properly typed at call sites
   minter: `0x${string}`,
   quantity: number,
   isEarly: boolean,
   timestamp: number
 ) {
   // Check if this wallet is linked to a main account
-  const linked = await db.find(linkedWallet, { address: minter });
+  const linked = await db.query.linkedWallet.findFirst({
+    where: eq(linkedWallet.address, minter),
+  });
   const mainAccount = linked?.mainAccountId ?? minter;
 
   // Get or create account
-  let acc = await db.find(account, { id: mainAccount });
+  let acc = await db.query.account.findFirst({
+    where: eq(account.id, mainAccount),
+  });
   
   if (!acc) {
-    acc = await db.insert(account).values({
+    const inserted = await db.insert(account).values({
       id: mainAccount,
       baseScore: 0,
       zoraScore: 0,
@@ -182,6 +203,7 @@ async function updateMinterScore(
       tier: "Novice",
       lastUpdated: timestamp,
     }).returning();
+    acc = inserted[0];
   }
 
   // Calculate new scores
@@ -194,19 +216,23 @@ async function updateMinterScore(
   const newTier = getTierFromScore(Number(newTotalScore));
 
   // Update account
-  await db.update(account, { id: mainAccount }).set({
-    zoraScore: newZoraScore,
-    timelyScore: newTimelyScore,
-    totalScore: newTotalScore,
-    tier: newTier,
-    lastUpdated: timestamp,
-  });
+  await db.update(account)
+    .set({
+      zoraScore: newZoraScore,
+      timelyScore: newTimelyScore,
+      totalScore: newTotalScore,
+      tier: newTier,
+      lastUpdated: timestamp,
+    })
+    .where(eq(account.id, mainAccount));
 
   // Update linked wallet stats if applicable
   if (linked) {
-    await db.update(linkedWallet, { address: minter }).set({
-      zoraMintCount: linked.zoraMintCount + quantity,
-      earlyMintCount: linked.earlyMintCount + (isEarly ? quantity : 0),
-    });
+    await db.update(linkedWallet)
+      .set({
+        zoraMintCount: linked.zoraMintCount + quantity,
+        earlyMintCount: linked.earlyMintCount + (isEarly ? quantity : 0),
+      })
+      .where(eq(linkedWallet.address, minter));
   }
 }
