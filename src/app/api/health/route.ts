@@ -1,11 +1,14 @@
 import { NextResponse } from 'next/server';
 import { HealthChecker } from '@/lib/health-checker';
+import { RequestLogger } from '@/lib/request-logger';
 
 export async function GET() {
   try {
     return await HealthChecker.healthEndpoint();
   } catch (error) {
-    console.error('Health check failed:', error);
+    RequestLogger.logError('Health check failed', error, {
+      endpoint: '/api/health',
+    });
     return NextResponse.json(
       {
         status: 'unhealthy',

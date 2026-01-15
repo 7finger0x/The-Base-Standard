@@ -1,0 +1,61 @@
+import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { IdentityService } from '@/lib/identity/identity-service';
+import { success, error, Errors } from '@/lib/api-utils';
+import { RequestLogger } from '@/lib/request-logger';
+import { addCorsHeaders } from '@/lib/cors';
+import { requireAuth } from '@/lib/session';
+
+/**
+ * DELETE /api/identity/wallets/[walletId]
+ * Unlink a wallet from user identity
+ */
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: { walletId: string } }
+) {
+  const startTime = Date.now();
+
+  // Require authentication
+  let auth: { userId: string; address?: string };
+  try {
+    auth = await requireAuth();
+  } catch (err) {
+    const response = NextResponse.json(
+      error(Errors.UNAUTHORIZED('Authentication required')),
+      { status: 401 }
+    );
+    addCorsHeaders(response, request.headers.get('origin'));
+    RequestLogger.logRequest(request, 401, Date.now() - startTime);
+    return response;
+  }
+
+  try {
+    const result = await IdentityService.unlinkWallet(auth.userId, params.walletId);
+
+    if (!result.success) {
+      const response = NextResponse.json(
+        error(Errors.BAD_REQUEST(result.error || 'Failed to unlink wallet')),
+        { status: 400 }
+      );
+      addCorsHeaders(response, request.headers.get('origin'));
+      RequestLogger.logRequest(request, 400, Date.now() - startTime);
+      return response;
+    }
+
+    const response = NextResponse.json(success({ message: 'Wallet unlinked successfully' }));
+    addCorsHeaders(response, request.headers.get('origin'));
+    RequestLogger.logRequest(request, 200, Date.now() - startTime);
+    return response;
+
+  } catch (err) {
+    const errorObj = err instanceof Error ? err : new Error('Unknown error');
+    const response = NextResponse.json(
+      error(Errors.INTERNAL_SERVER_ERROR(errorObj.message)),
+      { status: 500 }
+    );
+    addCorsHeaders(response, request.headers.get('origin'));
+    RequestLogger.logRequest(request, 500, Date.now() - startTime, errorObj);
+    return response;
+  }
+}

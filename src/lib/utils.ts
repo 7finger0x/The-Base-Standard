@@ -1,5 +1,9 @@
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { RequestLogger } from './request-logger';
+import { createPublicClient, http, type Address } from 'viem';
+import { base } from 'viem/chains';
+import { BASE_RPC_URL } from './env';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -14,42 +18,132 @@ export function formatScore(score: number): string {
 }
 
 export function getTierFromScore(score: number): string {
-  if (score >= 1000) return 'BASED';
-  if (score >= 850) return 'Gold';
-  if (score >= 500) return 'Silver';
-  if (score >= 100) return 'Bronze';
-  return 'Novice';
+  // Recalibrated tier thresholds (0-1000 scale)
+  if (score >= 951) return 'LEGEND';      // Top 1%
+  if (score >= 851) return 'BASED';       // Top 5% (95th-99th)
+  if (score >= 651) return 'BUILDER';     // 75th-95th
+  if (score >= 351) return 'RESIDENT';    // 40th-75th
+  return 'TOURIST';                       // Bottom 40% (0-350)
 }
 
 // Base Names resolution utilities
+// Base Names uses ENS-compatible contracts on Base L2
+const BASE_NAMES_REVERSE_REGISTRAR = '0x0000000000D8e504002cC26E3Ec46D81971C1664' as Address;
+const BASE_NAMES_RESOLVER = '0x426fa03fB86E510d0Dd9F70335Cf102a98b10875' as Address;
+
+// ENS resolver ABI (standard functions)
+const RESOLVER_ABI = [
+  {
+    name: 'name',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ name: 'addr', type: 'address' }],
+    outputs: [{ name: '', type: 'string' }],
+  },
+] as const;
+
+const REVERSE_REGISTRAR_ABI = [
+  {
+    name: 'node',
+    type: 'function',
+    stateMutability: 'pure',
+    inputs: [{ name: 'addr', type: 'address' }],
+    outputs: [{ name: '', type: 'bytes32' }],
+  },
+] as const;
+
+/**
+ * Resolve an Ethereum address to a Base Name (.base.eth)
+ * Uses ENS reverse resolution on Base L2
+ */
 export async function resolveBaseName(address: string): Promise<string | null> {
   try {
-    // Base Names registry contract address (this is the actual Base Names registry)
-    // const BASE_NAMES_REGISTRY = '0x4cCb0BB02FCABA27e82a56646E81d8c5bC4119a5';
+    const normalizedAddress = address.toLowerCase() as Address;
     
-    // Simple check - in production, you'd use the actual Base Names contract
-    // For now, we'll simulate the resolution
-    
-    // Mock implementation - in real app, integrate with Base Names API or contract
-    const mockNames: Record<string, string> = {
-      // You can add known addresses here for testing
-    };
-    
-    return mockNames[address.toLowerCase()] || null;
+    // Create viem client for Base
+    const client = createPublicClient({
+      chain: base,
+      transport: http(BASE_RPC_URL, {
+        timeout: 10000, // 10 second timeout
+      }),
+    });
+
+    // Step 1: Get the reverse node from Reverse Registrar
+    let node: `0x${string}`;
+    try {
+      node = await client.readContract({
+        address: BASE_NAMES_REVERSE_REGISTRAR,
+        abi: REVERSE_REGISTRAR_ABI,
+        functionName: 'node',
+        args: [normalizedAddress],
+      });
+    } catch (error) {
+      // If reverse node lookup fails, address doesn't have a name
+      return null;
+    }
+
+    // Step 2: Query the resolver for the name
+    try {
+      const name = await client.readContract({
+        address: BASE_NAMES_RESOLVER,
+        abi: RESOLVER_ABI,
+        functionName: 'name',
+        args: [normalizedAddress],
+      });
+
+      // Return name if found (it may already include .base.eth suffix)
+      if (name && name.length > 0) {
+        return name.endsWith('.base.eth') ? name : `${name}.base.eth`;
+      }
+
+      return null;
+    } catch (error) {
+      // Resolver query failed, address may not have a name
+      return null;
+    }
   } catch (error) {
-    console.warn('Failed to resolve Base Name:', error);
+    RequestLogger.logWarning('Failed to resolve Base Name', {
+      address,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
     return null;
   }
 }
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export async function reverseResolveBaseName(_name: string): Promise<string | null> {
+/**
+ * Reverse resolve a Base Name to an Ethereum address
+ * Queries the ENS resolver on Base L2
+ */
+export async function reverseResolveBaseName(name: string): Promise<string | null> {
   try {
-    // Reverse lookup - convert name back to address
-    // This would typically query the Base Names registry
-    return null; // Placeholder - implement actual reverse resolution
+    // Remove .base.eth suffix if present
+    const normalizedName = name.replace(/\.base\.eth$/, '');
+    
+    const client = createPublicClient({
+      chain: base,
+      transport: http(BASE_RPC_URL, { timeout: 10000 }),
+    });
+
+    // ENS resolver ABI for addr() function
+    const ADDR_RESOLVER_ABI = [
+      {
+        name: 'addr',
+        type: 'function',
+        stateMutability: 'view',
+        inputs: [{ name: 'node', type: 'bytes32' }],
+        outputs: [{ name: '', type: 'address' }],
+      },
+    ] as const;
+
+    // Note: This requires the full ENS namehash calculation
+    // For now, return null as full implementation requires namehash library
+    // In production, use @ensdomains/ensjs or calculate namehash manually
+    return null;
   } catch (error) {
-    console.warn('Failed to reverse resolve Base Name:', error);
+    RequestLogger.logWarning('Failed to reverse resolve Base Name', {
+      name,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
     return null;
   }
 }

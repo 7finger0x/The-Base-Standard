@@ -1,8 +1,12 @@
 import { NextResponse } from 'next/server';
+import type { NextRequest } from 'next/server';
+import { RequestLogger } from '@/lib/request-logger';
+import { addCorsHeaders } from '@/lib/cors';
 
 const PONDER_URL = process.env.PONDER_URL || 'http://localhost:42069';
 
-export async function GET(request: Request) {
+export async function GET(request: NextRequest) {
+  const startTime = Date.now();
   const { searchParams } = new URL(request.url);
   const limit = parseInt(searchParams.get('limit') || '100');
   const offset = parseInt(searchParams.get('offset') || '0');
@@ -16,15 +20,25 @@ export async function GET(request: Request) {
 
     if (ponderResponse.ok) {
       const data = await ponderResponse.json();
-      return NextResponse.json(data);
+      const response = NextResponse.json(data);
+      addCorsHeaders(response, request.headers.get('origin'));
+      RequestLogger.logRequest(request, 200, Date.now() - startTime);
+      return response;
     }
-  } catch {
-    console.log('Ponder not available, using mock data');
+  } catch (error) {
+    RequestLogger.logWarning('Ponder not available, using mock data', {
+      limit,
+      offset,
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
   }
 
   // Fallback mock leaderboard
   const mockLeaderboard = generateMockLeaderboard(limit, offset);
-  return NextResponse.json(mockLeaderboard);
+  const response = NextResponse.json(mockLeaderboard);
+  addCorsHeaders(response, request.headers.get('origin'));
+  RequestLogger.logRequest(request, 200, Date.now() - startTime);
+  return response;
 }
 
 function generateMockLeaderboard(limit: number, offset: number) {
@@ -32,8 +46,9 @@ function generateMockLeaderboard(limit: number, offset: number) {
 
   for (let i = 0; i < limit; i++) {
     const rank = offset + i + 1;
-    const score = Math.max(0, 1200 - rank * 10 + Math.floor(Math.random() * 50));
-    const tier = score >= 1000 ? 'BASED' : score >= 850 ? 'Gold' : score >= 500 ? 'Silver' : score >= 100 ? 'Bronze' : 'Novice';
+    // Generate scores in 0-1000 range (recalibrated)
+    const score = Math.max(0, Math.min(1000, 1000 - rank * 2 + Math.floor(Math.random() * 50)));
+    const tier = getTier(score);
 
     leaderboard.push({
       rank,
@@ -52,11 +67,25 @@ function generateMockLeaderboard(limit: number, offset: number) {
   });
 
   return {
-    leaderboard,
-    pagination: {
-      limit,
-      offset,
-      hasMore: offset + limit < 1000,
+    success: true,
+    data: {
+      leaderboard,
+      pagination: {
+        limit,
+        offset,
+        hasMore: offset + limit < 1000,
+        total: 10000,
+      },
     },
+    timestamp: new Date().toISOString(),
   };
+}
+
+function getTier(score: number): string {
+  // Recalibrated tier thresholds (0-1000 scale)
+  if (score >= 951) return 'LEGEND';      // Top 1%
+  if (score >= 851) return 'BASED';       // Top 5% (95th-99th)
+  if (score >= 651) return 'BUILDER';     // 75th-95th
+  if (score >= 351) return 'RESIDENT';    // 40th-75th
+  return 'TOURIST';                       // Bottom 40% (0-350)
 }

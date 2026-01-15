@@ -19,7 +19,7 @@
 - **Cross-Chain Scoring**: Tracks activity across Base L2 and Zora networks
 - **Timeliness Rewards**: Bonus points for early NFT adoption (<24h after mint)
 - **Real-Time Leaderboards**: Live rankings with pagination and filtering
-- **Tier System**: 5-tier progression (Novice → Bronze → Silver → Gold → BASED)
+- **Tier System**: 5-tier progression (TOURIST → RESIDENT → BUILDER → BASED → LEGEND)
 
 ### ✅ Technical Stack
 - **Frontend**: Next.js 15, React 19, TypeScript 5.6, Tailwind CSS

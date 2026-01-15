@@ -100,7 +100,7 @@ function LeaderboardRow({ entry }: { entry: LeaderboardEntry }) {
         {entry.score.toLocaleString()}
       </div>
       <div className="col-span-3 flex justify-end">
-        <TierBadge tier={entry.tier} mini />
+        <TierBadge tier={entry.tier} size="sm" />
       </div>
     </div>
   );

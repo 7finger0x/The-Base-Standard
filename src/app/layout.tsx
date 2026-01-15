@@ -6,10 +6,21 @@ import './globals.css';
 export const metadata: Metadata = {
   title: 'The Base Standard',
   description: 'Your on-chain reputation score across Base and Zora - The Standard for Base L2',
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
   openGraph: {
     title: 'The Base Standard',
     description: 'Your on-chain reputation score across Base and Zora - The Standard for Base L2',
     images: ['/og-image.jpg'],
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'The Base Standard',
+    description: 'Your on-chain reputation score across Base and Zora',
+    images: ['/twitter-card.jpg'],
   },
 };
 

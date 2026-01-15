@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/db';
-import { User, ReputationLog, ActivityLog, LeaderboardSnapshot } from '@prisma/client';
+import { User, ReputationLog, ActivityLog, LeaderboardSnapshot, Wallet } from '@prisma/client';
+import { IdentityService } from '@/lib/identity/identity-service';
 
 export interface CreateUserInput {
   address: string;
@@ -24,14 +25,24 @@ export class DatabaseService {
     return await prisma.user.create({
       data: {
         address: data.address.toLowerCase(),
-        ensName: data.ensName,
         score: data.score ?? 0,
-        tier: data.tier ?? 'NOVICE',
+        tier: data.tier ?? 'TOURIST',
       },
     });
   }
 
   async getUserByAddress(address: string): Promise<User | null> {
+    // Try new identity system first
+    const user = await IdentityService.findUserByWallet(
+      address.toLowerCase() as `0x${string}`,
+      'EVM'
+    );
+    
+    if (user) {
+      return user;
+    }
+    
+    // Fallback to legacy system (address field)
     return await prisma.user.findUnique({
       where: { address: address.toLowerCase() },
     });
@@ -135,11 +146,12 @@ export class DatabaseService {
 
   // Utility methods
   private calculateTier(score: number): string {
-    if (score >= 1000) return 'BASED';
-    if (score >= 850) return 'GOLD';
-    if (score >= 500) return 'SILVER';
-    if (score >= 100) return 'BRONZE';
-    return 'NOVICE';
+    // Recalibrated tier thresholds (0-1000 scale)
+    if (score >= 951) return 'LEGEND';      // Top 1%
+    if (score >= 851) return 'BASED';       // Top 5% (95th-99th)
+    if (score >= 651) return 'BUILDER';     // 75th-95th
+    if (score >= 351) return 'RESIDENT';    // 40th-75th
+    return 'TOURIST';                       // Bottom 40% (0-350)
   }
 
   // Health check

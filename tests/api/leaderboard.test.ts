@@ -1,5 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GET } from '@/app/api/leaderboard/route';
+import { NextRequest } from 'next/server';
 
 // Mock fetch
 global.fetch = vi.fn();
@@ -11,7 +12,7 @@ describe('Leaderboard API Route', () => {
 
   describe('GET /api/leaderboard', () => {
     it('should return leaderboard with default limit and offset', async () => {
-      const request = new Request('http://localhost:3000/api/leaderboard');
+      const request = new NextRequest('http://localhost:3000/api/leaderboard');
       const response = await GET(request);
       const data = await response.json();
 
@@ -22,7 +23,7 @@ describe('Leaderboard API Route', () => {
     });
 
     it('should respect custom limit parameter', async () => {
-      const request = new Request('http://localhost:3000/api/leaderboard?limit=50');
+      const request = new NextRequest('http://localhost:3000/api/leaderboard?limit=50');
       const response = await GET(request);
       const data = await response.json();
 
@@ -31,7 +32,7 @@ describe('Leaderboard API Route', () => {
     });
 
     it('should respect offset parameter', async () => {
-      const request = new Request('http://localhost:3000/api/leaderboard?offset=100');
+      const request = new NextRequest('http://localhost:3000/api/leaderboard?offset=100');
       const response = await GET(request);
       const data = await response.json();
 
@@ -40,7 +41,7 @@ describe('Leaderboard API Route', () => {
     });
 
     it('should return ranked users in descending score order', async () => {
-      const request = new Request('http://localhost:3000/api/leaderboard?limit=10');
+      const request = new NextRequest('http://localhost:3000/api/leaderboard?limit=10');
       const response = await GET(request);
       const data = await response.json();
 
@@ -50,7 +51,7 @@ describe('Leaderboard API Route', () => {
     });
 
     it('should include tier for each user', async () => {
-      const request = new Request('http://localhost:3000/api/leaderboard?limit=10');
+      const request = new NextRequest('http://localhost:3000/api/leaderboard?limit=10');
       const response = await GET(request);
       const data = await response.json();
 
@@ -61,7 +62,7 @@ describe('Leaderboard API Route', () => {
     });
 
     it('should include address for each user', async () => {
-      const request = new Request('http://localhost:3000/api/leaderboard?limit=5');
+      const request = new NextRequest('http://localhost:3000/api/leaderboard?limit=5');
       const response = await GET(request);
       const data = await response.json();
 
@@ -72,12 +73,12 @@ describe('Leaderboard API Route', () => {
     });
 
     it('should indicate hasMore correctly', async () => {
-      const request1 = new Request('http://localhost:3000/api/leaderboard?limit=100&offset=0');
+      const request1 = new NextRequest('http://localhost:3000/api/leaderboard?limit=100&offset=0');
       const response1 = await GET(request1);
       const data1 = await response1.json();
       expect(data1.pagination.hasMore).toBe(true);
 
-      const request2 = new Request('http://localhost:3000/api/leaderboard?limit=100&offset=950');
+      const request2 = new NextRequest('http://localhost:3000/api/leaderboard?limit=100&offset=950');
       const response2 = await GET(request2);
       const data2 = await response2.json();
       expect(data2.pagination.hasMore).toBe(false);
@@ -96,7 +97,7 @@ describe('Leaderboard API Route', () => {
         json: async () => mockLeaderboard,
       });
 
-      const request = new Request('http://localhost:3000/api/leaderboard');
+      const request = new NextRequest('http://localhost:3000/api/leaderboard');
       const response = await GET(request);
       const data = await response.json();
 
@@ -106,7 +107,7 @@ describe('Leaderboard API Route', () => {
     it('should fallback to mock data when Ponder fails', async () => {
       (global.fetch as any).mockRejectedValueOnce(new Error('Ponder unavailable'));
 
-      const request = new Request('http://localhost:3000/api/leaderboard');
+      const request = new NextRequest('http://localhost:3000/api/leaderboard');
       const response = await GET(request);
       const data = await response.json();
 

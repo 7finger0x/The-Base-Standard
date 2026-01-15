@@ -6,24 +6,43 @@ export interface ReputationData {
   address: string;
   totalScore: number;
   tier: string;
-  breakdown: {
-    baseTenure: {
+  rank?: number;
+  totalUsers?: number;
+  // New PVC format
+  pillars?: {
+    capital: number;    // Pillar 1: Capital Efficiency (max 400)
+    diversity: number;   // Pillar 2: Ecosystem Diversity (max 300)
+    identity: number;   // Pillar 3: Identity & Social Proof (max 300)
+  };
+  multiplier?: number;   // Sybil resistance multiplier
+  decayInfo?: {
+    daysSinceLastActivity: number;
+    decayMultiplier: number;
+    willDecay: boolean;
+  };
+  // Legacy format (for backward compatibility)
+  breakdown?: {
+    baseTenure?: {
       score: number;
       days: number;
       firstTx: string;
     };
-    zoraMints: {
+    zoraMints?: {
       score: number;
       count: number;
       earlyMints: number;
     };
-    timeliness: {
+    timeliness?: {
       score: number;
       earlyAdopterCount: number;
     };
+    economic?: number;   // Capital pillar (if using old format)
+    social?: number;     // Identity pillar (if using old format)
+    diversity?: number;  // Diversity pillar (if using old format)
   };
-  linkedWallets: string[];
-  lastUpdated: string;
+  linkedWallets?: string[];
+  lastUpdated?: string;
+  scoringModel?: 'PVC' | 'legacy';
 }
 
 async function fetchReputation(address: string): Promise<ReputationData> {

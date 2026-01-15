@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
+import { handleCors, addCorsHeaders } from '@/lib/cors';
+import { RequestLogger } from '@/lib/request-logger';
 
 // Simple in-memory rate limiter
 // For production, use Redis or a proper rate limiting service
@@ -35,13 +37,31 @@ function checkRateLimit(key: string): { allowed: boolean; remaining: number; res
 }
 
 export function middleware(request: NextRequest) {
+  const startTime = Date.now();
+  const pathname = request.nextUrl.pathname;
+
+  // Handle CORS for API routes
+  if (pathname.startsWith('/api/')) {
+    const corsResponse = handleCors(request);
+    if (corsResponse) {
+      return corsResponse;
+    }
+  }
+
   // Only apply rate limiting to API routes
-  if (request.nextUrl.pathname.startsWith('/api/')) {
+  if (pathname.startsWith('/api/')) {
     const key = getRateLimitKey(request);
     const { allowed, remaining, resetTime } = checkRateLimit(key);
 
     if (!allowed) {
-      return NextResponse.json(
+      RequestLogger.logSecurityEvent({
+        type: 'rate_limit',
+        path: pathname,
+        ip: key,
+        details: { limit: MAX_REQUESTS },
+      });
+
+      const response = NextResponse.json(
         {
           success: false,
           error: {
@@ -60,6 +80,10 @@ export function middleware(request: NextRequest) {
           },
         }
       );
+
+      addCorsHeaders(response, request.headers.get('origin'));
+      RequestLogger.logRequest(request, 429, Date.now() - startTime);
+      return response;
     }
 
     // Add rate limit headers to successful responses
@@ -67,7 +91,9 @@ export function middleware(request: NextRequest) {
     response.headers.set('X-RateLimit-Limit', MAX_REQUESTS.toString());
     response.headers.set('X-RateLimit-Remaining', remaining.toString());
     response.headers.set('X-RateLimit-Reset', new Date(resetTime).toISOString());
+    addCorsHeaders(response, request.headers.get('origin'));
 
+    // Log request after response (will be logged in route handler)
     return response;
   }
 

@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { GET } from '@/app/api/reputation/route';
-import { NextResponse } from 'next/server';
+import { NextRequest } from 'next/server';
 
 // Mock fetch
 global.fetch = vi.fn();
@@ -12,7 +12,7 @@ describe('Reputation API Route', () => {
 
   describe('GET /api/reputation', () => {
     it('should return 400 when address is missing', async () => {
-      const request = new Request('http://localhost:3000/api/reputation');
+      const request = new NextRequest('http://localhost:3000/api/reputation');
       const response = await GET(request);
       const data = await response.json();
 
@@ -33,7 +33,7 @@ describe('Reputation API Route', () => {
         json: async () => mockData,
       });
 
-      const request = new Request(`http://localhost:3000/api/reputation?address=${validAddress}`);
+      const request = new NextRequest(`http://localhost:3000/api/reputation?address=${validAddress}`);
       const response = await GET(request);
       const data = await response.json();
 
@@ -47,7 +47,7 @@ describe('Reputation API Route', () => {
       const validAddress = '0x1234567890123456789012345678901234567890';
       (global.fetch as any).mockRejectedValueOnce(new Error('Connection failed'));
 
-      const request = new Request(`http://localhost:3000/api/reputation?address=${validAddress}`);
+      const request = new NextRequest(`http://localhost:3000/api/reputation?address=${validAddress}`);
       const response = await GET(request);
       const data = await response.json();
 
@@ -64,7 +64,7 @@ describe('Reputation API Route', () => {
         status: 500,
       });
 
-      const request = new Request(`http://localhost:3000/api/reputation?address=${validAddress}`);
+      const request = new NextRequest(`http://localhost:3000/api/reputation?address=${validAddress}`);
       const response = await GET(request);
       const data = await response.json();
 
@@ -77,11 +77,11 @@ describe('Reputation API Route', () => {
       const validAddress = '0xABCDEF1234567890ABCDEF1234567890ABCDEF12';
       (global.fetch as any).mockRejectedValue(new Error('No Ponder'));
 
-      const request1 = new Request(`http://localhost:3000/api/reputation?address=${validAddress}`);
+      const request1 = new NextRequest(`http://localhost:3000/api/reputation?address=${validAddress}`);
       const response1 = await GET(request1);
       const data1 = await response1.json();
 
-      const request2 = new Request(`http://localhost:3000/api/reputation?address=${validAddress}`);
+      const request2 = new NextRequest(`http://localhost:3000/api/reputation?address=${validAddress}`);
       const response2 = await GET(request2);
       const data2 = await response2.json();
 
@@ -94,11 +94,11 @@ describe('Reputation API Route', () => {
       const address2 = '0x2222222222222222222222222222222222222222';
       (global.fetch as any).mockRejectedValue(new Error('No Ponder'));
 
-      const request1 = new Request(`http://localhost:3000/api/reputation?address=${address1}`);
+      const request1 = new NextRequest(`http://localhost:3000/api/reputation?address=${address1}`);
       const response1 = await GET(request1);
       const data1 = await response1.json();
 
-      const request2 = new Request(`http://localhost:3000/api/reputation?address=${address2}`);
+      const request2 = new NextRequest(`http://localhost:3000/api/reputation?address=${address2}`);
       const response2 = await GET(request2);
       const data2 = await response2.json();
 

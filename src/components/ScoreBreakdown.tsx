@@ -7,101 +7,103 @@ export function ScoreBreakdown() {
   const { address } = useAccount();
   const { data: reputation, isLoading } = useReputation(address);
 
-  if (!address || isLoading || !reputation) {
+  if (!address) return null;
+
+  if (isLoading || !reputation) {
     return (
-      <div className="p-6 rounded-2xl border border-zinc-800 bg-zinc-900/50 animate-pulse">
-        <div className="h-6 w-40 bg-zinc-800 rounded mb-4" />
-        <div className="space-y-3">
-          <div className="h-16 bg-zinc-800 rounded" />
-          <div className="h-16 bg-zinc-800 rounded" />
-          <div className="h-16 bg-zinc-800 rounded" />
+      <div className="space-y-4 animate-pulse">
+        <div className="h-8 bg-zinc-800 rounded w-1/3" />
+        <div className="grid gap-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-24 bg-zinc-800 rounded-xl" />
+          ))}
         </div>
       </div>
     );
   }
 
-  const { breakdown } = reputation;
+  // Fallback for legacy data structure if pillars aren't present
+  const pillars = reputation.pillars || {
+    capital: reputation.breakdown?.economic || 0,
+    diversity: reputation.breakdown?.diversity || 0,
+    identity: reputation.breakdown?.social || 0,
+  };
+
+  const decay = reputation.decayInfo;
+  const showDecayWarning = decay?.willDecay || (decay?.daysSinceLastActivity || 0) > 30;
 
   return (
-    <div className="p-6 rounded-2xl border border-zinc-800 bg-zinc-900/50 backdrop-blur-sm">
-      <h3 className="text-lg font-bold text-zinc-400 uppercase tracking-wider mb-4">
-        Score Breakdown
-      </h3>
-
-      <div className="space-y-4">
-        {/* Base Tenure */}
-        <ScoreItem
-          icon="B"
-          iconColor="bg-blue-600/20 text-blue-400"
-          label="Base Tenure"
-          score={breakdown.baseTenure.score}
-          detail={`${breakdown.baseTenure.days} days since first tx`}
-          percentage={(breakdown.baseTenure.score / reputation.totalScore) * 100}
-          barColor="bg-blue-500"
-        />
-
-        {/* Zora Mints */}
-        <ScoreItem
-          icon="Z"
-          iconColor="bg-purple-600/20 text-purple-400"
-          label="Zora Mints"
-          score={breakdown.zoraMints.score}
-          detail={`${breakdown.zoraMints.count} NFTs minted`}
-          percentage={(breakdown.zoraMints.score / reputation.totalScore) * 100}
-          barColor="bg-purple-500"
-        />
-
-        {/* Timeliness */}
-        <ScoreItem
-          icon="⚡"
-          iconColor="bg-cyan-600/20 text-cyan-400"
-          label="Timeliness Bonus"
-          score={breakdown.timeliness.score}
-          detail={`${breakdown.timeliness.earlyAdopterCount} early mints (< 24h)`}
-          percentage={(breakdown.timeliness.score / reputation.totalScore) * 100}
-          barColor="bg-cyan-500"
-        />
+    <div className="space-y-6">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold text-white">Score Breakdown</h3>
+        {reputation.multiplier && reputation.multiplier > 1 && (
+          <span className="px-2 py-1 text-xs font-medium text-emerald-400 bg-emerald-400/10 rounded-full border border-emerald-400/20">
+            {reputation.multiplier}x Multiplier
+          </span>
+        )}
       </div>
 
-      {/* Formula Info */}
-      <div className="mt-6 pt-4 border-t border-zinc-800">
-        <p className="text-xs text-zinc-600">
-          Score = Base Tenure + Zora Activity + Timeliness Bonus
-        </p>
+      {showDecayWarning && (
+        <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-200 text-sm">
+          <div className="font-semibold mb-1">Score Decay Active</div>
+          <div>
+            {decay?.daysSinceLastActivity} days inactive. Perform a transaction to restore your score multiplier.
+          </div>
+        </div>
+      )}
+
+      <div className="grid gap-4">
+        <PillarCard
+          title="Capital Efficiency"
+          score={pillars.capital}
+          max={400}
+          icon="💰"
+          color="bg-emerald-500"
+          description="Liquidity duration, volume, gas usage"
+        />
+        <PillarCard
+          title="Ecosystem Diversity"
+          score={pillars.diversity}
+          max={300}
+          icon="🌐"
+          color="bg-blue-500"
+          description="Unique protocols, vintage contracts"
+        />
+        <PillarCard
+          title="Identity & Social"
+          score={pillars.identity}
+          max={300}
+          icon="🆔"
+          color="bg-purple-500"
+          description="Farcaster, Coinbase, wallet tenure"
+        />
       </div>
     </div>
   );
 }
 
-interface ScoreItemProps {
-  icon: string;
-  iconColor: string;
-  label: string;
-  score: number;
-  detail: string;
-  percentage: number;
-  barColor: string;
-}
-
-function ScoreItem({ icon, iconColor, label, score, detail, percentage, barColor }: ScoreItemProps) {
+function PillarCard({ title, score, max, icon, color, description }: any) {
+  const percentage = Math.min(100, (score / max) * 100);
+  
   return (
-    <div className="p-3 rounded-lg bg-zinc-800/50">
-      <div className="flex items-center justify-between mb-2">
-        <div className="flex items-center gap-3">
-          <div className={`w-8 h-8 rounded-full flex items-center justify-center ${iconColor}`}>
-            <span className="font-bold text-sm">{icon}</span>
-          </div>
+    <div className="p-4 rounded-xl bg-zinc-900/50 border border-zinc-800">
+      <div className="flex justify-between items-start mb-2">
+        <div className="flex items-center gap-2">
+          <span className="text-xl">{icon}</span>
           <div>
-            <p className="font-semibold text-white">{label}</p>
-            <p className="text-xs text-zinc-500">{detail}</p>
+            <div className="font-medium text-white">{title}</div>
+            <div className="text-xs text-zinc-500">{description}</div>
           </div>
         </div>
-        <span className="text-xl font-bold text-white">+{score}</span>
+        <div className="text-right">
+          <div className="font-bold text-white">{Math.round(score)} / {max}</div>
+          <div className="text-xs text-zinc-500">{Math.round(percentage)}%</div>
+        </div>
       </div>
-      <div className="h-1.5 bg-zinc-700 rounded-full overflow-hidden">
-        <div
-          className={`h-full ${barColor} rounded-full transition-all duration-500`}
-          style={{ width: `${Math.min(percentage, 100)}%` }}
+      <div className="h-2 bg-zinc-800 rounded-full overflow-hidden">
+        <div 
+          className={`h-full ${color} transition-all duration-1000`} 
+          style={{ width: `${percentage}%` }}
         />
       </div>
     </div>

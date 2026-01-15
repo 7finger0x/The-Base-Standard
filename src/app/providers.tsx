@@ -14,6 +14,7 @@ if (typeof crypto !== 'undefined' && !crypto.randomUUID) {
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { WagmiProvider } from 'wagmi';
 import { OnchainKitProvider } from '@coinbase/onchainkit';
+import { SessionProvider } from 'next-auth/react';
 import { base } from 'wagmi/chains';
 import { wagmiConfig } from '@/lib/wagmi';
 import { useState } from 'react';
@@ -32,15 +33,17 @@ export function Providers({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={queryClient}>
-        <OnchainKitProvider
-          chain={base}
-          apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
-        >
-          {children}
-        </OnchainKitProvider>
-      </QueryClientProvider>
-    </WagmiProvider>
+    <SessionProvider>
+      <WagmiProvider config={wagmiConfig}>
+        <QueryClientProvider client={queryClient}>
+          <OnchainKitProvider
+            chain={base}
+            apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
+          >
+            {children}
+          </OnchainKitProvider>
+        </QueryClientProvider>
+      </WagmiProvider>
+    </SessionProvider>
   );
 }

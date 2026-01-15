@@ -2,6 +2,8 @@ import type { NextConfig } from 'next';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  // Enable standalone output for Docker
+  output: process.env.DOCKER_BUILD === 'true' ? 'standalone' : undefined,
   images: {
     remotePatterns: [
       {

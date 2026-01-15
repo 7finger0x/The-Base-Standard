@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "../node_modules/.prisma/client"
@@ -14,66 +8,130 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// User reputation scores and rankings
 model User {
-  id              String     @id @default(uuid())
-  address         String     @unique
-  ensName         String?
-  score           Float      @default(0)
-  rank            Int        @default(0)
-  tier            String     @default("BRONZE")
-  lastUpdated     DateTime   @default(now())
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
-
-  // Related records
-  reputationLogs  ReputationLog[]
-  activityLogs    ActivityLog[]
+  id             String          @id @default(uuid())
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  username       String?         @unique
+  avatarUrl      String?
+  bio            String?
+  displayName    String?
+  score          Float           @default(0)
+  rank           Int             @default(0)
+  tier           String          @default("TOURIST")
+  lastUpdated    DateTime        @default(now())
+  address        String?         @unique
+  accounts       Account[]
+  activityLogs   ActivityLog[]
+  reputationLogs ReputationLog[]
+  sessions       Session[]
+  wallets        Wallet[]
 
   @@index([score])
   @@index([rank])
   @@index([tier])
+  @@index([username])
 }
 
-// Detailed reputation breakdown
+model Wallet {
+  id                 String   @id @default(uuid())
+  address            String
+  chainType          String   @default("EVM")
+  label              String?
+  verifiedAt         DateTime @default(now())
+  verificationMethod String   @default("EIP712")
+  isPrimary          Boolean  @default(false)
+  userId             String
+  user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([address, chainType])
+  @@index([address])
+  @@index([userId])
+}
+
+model Account {
+  id                String  @id @default(uuid())
+  userId            String
+  type              String  @default("oauth")
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  providerUsername  String?
+  providerAvatar    String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+  @@index([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([sessionToken])
+  @@index([userId])
+}
+
+model SiweNonce {
+  id        String   @id @default(uuid())
+  nonce     String   @unique
+  userId    String?
+  address   String?
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([nonce])
+  @@index([userId])
+  @@index([address])
+}
+
 model ReputationLog {
-  id          String   @id @default(uuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  category    String   // base_activity, nft_trading, social_engagement, etc.
-  points      Float
-  multiplier  Float    @default(1.0)
-  timestamp   DateTime @default(now())
-  metadata    String?
+  id         String   @id @default(uuid())
+  userId     String
+  category   String
+  points     Float
+  multiplier Float    @default(1.0)
+  timestamp  DateTime @default(now())
+  metadata   String?
+  user       User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([category])
   @@index([timestamp])
 }
 
-// User activity tracking
 model ActivityLog {
-  id          String   @id @default(uuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  type        String   // transaction, nft_purchase, social_post, etc.
-  contract    String?
-  tokenId     String?
-  amount      Float?
-  timestamp   DateTime @default(now())
-  metadata    String?
+  id        String   @id @default(uuid())
+  userId    String
+  type      String
+  contract  String?
+  tokenId   String?
+  amount    Float?
+  timestamp DateTime @default(now())
+  metadata  String?
+  user      User     @relation(fields: [userId], references: [id])
 
   @@index([userId])
   @@index([type])
   @@index([timestamp])
 }
 
-// Leaderboard snapshots
 model LeaderboardSnapshot {
-  id        String   @id @default(uuid())
-  timestamp DateTime @default(now())
-  topUsers  String   // Store top N users as JSON for quick access
+  id         String   @id @default(uuid())
+  timestamp  DateTime @default(now())
+  topUsers   String
   totalUsers Int
-  
+
   @@index([timestamp])
 }

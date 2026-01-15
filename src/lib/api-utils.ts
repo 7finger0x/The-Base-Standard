@@ -18,8 +18,8 @@ export const Errors = {
   UNAUTHORIZED: (message = 'Unauthorized') => new ApiError(401, message, 'UNAUTHORIZED'),
   FORBIDDEN: (message = 'Forbidden') => new ApiError(403, message, 'FORBIDDEN'),
   NOT_FOUND: (message = 'Not Found') => new ApiError(404, message, 'NOT_FOUND'),
-  VALIDATION_ERROR: (details?: Record<string, unknown>) =>
-    new ApiError(422, 'Validation Error', 'VALIDATION_ERROR', details),
+  VALIDATION_ERROR: (details?: Record<string, unknown> | unknown[]) =>
+    new ApiError(422, 'Validation Error', 'VALIDATION_ERROR', Array.isArray(details) ? { issues: details } : details),
 
   // Server errors
   INTERNAL_SERVER_ERROR: (message = 'Internal Server Error') => 
@@ -34,6 +34,8 @@ export const Errors = {
     new ApiError(500, message, 'DATABASE_ERROR'),
   INDEXER_UNAVAILABLE: () => 
     new ApiError(503, 'Indexer service is unavailable', 'INDEXER_UNAVAILABLE'),
+  RATE_LIMIT_EXCEEDED: () => 
+    new ApiError(429, 'Too many requests', 'RATE_LIMIT_EXCEEDED'),
 };
 
 // Success response helper

@@ -17,6 +17,7 @@ import { RankCard } from '@/components/RankCard';
 import { WalletList } from '@/components/WalletList';
 import { TierBadge } from '@/components/TierBadge';
 import { ScoreBreakdown } from '@/components/ScoreBreakdown';
+import { SignInButton } from '@/components/SignInButton';
 
 export default function HomePage() {
   const { isConnected } = useAccount();
@@ -58,21 +59,24 @@ export default function HomePage() {
             </div>
           </div>
 
-          {/* Wallet */}
-          <Wallet>
-            <ConnectWallet className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold px-4 py-2 rounded-lg transition-all">
-              <Avatar className="h-5 w-5" />
-              <Name className="ml-2" />
-            </ConnectWallet>
-            <WalletDropdown>
-              <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
-                <Avatar className="h-10 w-10" />
-                <Name className="font-semibold" />
-                <Address className="text-zinc-400" />
-              </Identity>
-              <WalletDropdownDisconnect />
-            </WalletDropdown>
-          </Wallet>
+          {/* Wallet & Sign In */}
+          <div className="flex items-center gap-3">
+            <Wallet>
+              <ConnectWallet className="bg-gradient-to-r from-cyan-600 to-blue-600 hover:from-cyan-500 hover:to-blue-500 text-white font-semibold px-4 py-2 rounded-lg transition-all">
+                <Avatar className="h-5 w-5" />
+                <Name className="ml-2" />
+              </ConnectWallet>
+              <WalletDropdown>
+                <Identity className="px-4 pt-3 pb-2" hasCopyAddressOnClick>
+                  <Avatar className="h-10 w-10" />
+                  <Name className="font-semibold" />
+                  <Address className="text-zinc-400" />
+                </Identity>
+                <WalletDropdownDisconnect />
+              </WalletDropdown>
+            </Wallet>
+            {isConnected && <SignInButton />}
+          </div>
         </div>
       </header>
 
@@ -107,11 +111,11 @@ export default function HomePage() {
             <div className="mt-16 w-full max-w-3xl">
               <p className="text-zinc-500 text-sm uppercase tracking-wider mb-6">Reputation Tiers</p>
               <div className="grid grid-cols-5 gap-3">
-                <TierBadge tier="Novice" mini />
-                <TierBadge tier="Bronze" mini />
-                <TierBadge tier="Silver" mini />
-                <TierBadge tier="Gold" mini />
-                <TierBadge tier="BASED" mini />
+                <TierBadge tier="TOURIST" size="sm" />
+                <TierBadge tier="RESIDENT" size="sm" />
+                <TierBadge tier="BUILDER" size="sm" />
+                <TierBadge tier="BASED" size="sm" />
+                <TierBadge tier="LEGEND" size="sm" />
               </div>
             </div>
 
@@ -139,12 +143,17 @@ export default function HomePage() {
           </div>
         ) : (
           /* Connected State */
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Score Card */}
-            <RankCard />
+          <div className="space-y-6">
+            {/* Sign-In Prompt (if not authenticated) */}
+            <SignInButton />
 
-            {/* Score Breakdown */}
-            <ScoreBreakdown />
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Score Card */}
+              <RankCard />
+
+              {/* Score Breakdown */}
+              <ScoreBreakdown />
+            </div>
 
             {/* Linked Wallets */}
             <div className="lg:col-span-2">
@@ -157,11 +166,11 @@ export default function HomePage() {
                 All Tiers
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-                <TierBadge tier="Novice" score={50} />
-                <TierBadge tier="Bronze" score={250} />
-                <TierBadge tier="Silver" score={650} />
-                <TierBadge tier="Gold" score={900} />
-                <TierBadge tier="BASED" score={1000} />
+                <TierBadge tier="TOURIST" size="md" />
+                <TierBadge tier="RESIDENT" size="md" />
+                <TierBadge tier="BUILDER" size="md" />
+                <TierBadge tier="BASED" size="md" />
+                <TierBadge tier="LEGEND" size="md" />
               </div>
             </div>
           </div>
