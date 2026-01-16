@@ -1,5 +1,5 @@
 import { prisma } from '@/lib/db';
-import { User, ActivityLog, LeaderboardSnapshot } from '@prisma/client';
+import type { User, ActivityLog, LeaderboardSnapshot } from '@/types/prisma';
 import { IdentityService } from '@/lib/identity/identity-service';
 
 export interface CreateUserInput {
