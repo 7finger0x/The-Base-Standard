@@ -1,6 +1,10 @@
 import { prisma } from '@/lib/db';
-import { User, ActivityLog, LeaderboardSnapshot } from '@prisma/client';
 import { IdentityService } from '@/lib/identity/identity-service';
+
+// Use return type inference from Prisma queries
+type User = Awaited<ReturnType<typeof prisma.user.findUnique>>;
+type ActivityLog = Awaited<ReturnType<typeof prisma.activityLog.findUnique>>;
+type LeaderboardSnapshot = Awaited<ReturnType<typeof prisma.leaderboardSnapshot.findUnique>>;
 
 export interface CreateUserInput {
   address: string;

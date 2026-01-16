@@ -50,6 +50,11 @@ export async function POST(request: NextRequest) {
       ...validationResult.data,
       timestamp: validationResult.data.timestamp || Date.now(),
       linkedWallets: validationResult.data.linkedWallets || [],
+      breakdown: validationResult.data.breakdown ? {
+        tenure: validationResult.data.breakdown.tenure ?? 0,
+        economic: validationResult.data.breakdown.economic ?? 0,
+        social: validationResult.data.breakdown.social ?? 0,
+      } : undefined,
     };
 
     // Store on IPFS

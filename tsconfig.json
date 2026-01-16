@@ -38,6 +38,7 @@
     "node_modules",
     "foundry",
     "apps/indexer",
-    "apps/agent"
+    "apps/agent",
+    "scripts"
   ]
 }

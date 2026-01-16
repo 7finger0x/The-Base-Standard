@@ -7,6 +7,8 @@
  */
 
 // Mock server-only for script execution
+// Note: This script is not included in the build
+// @ts-expect-error - NODE_ENV assignment for script execution only
 process.env.NODE_ENV = 'test';
 
 // Direct implementation for testing (bypasses server-only)

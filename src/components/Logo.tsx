@@ -21,13 +21,6 @@ interface LogoProps {
  * Falls back to gradient badge if logo files don't exist.
  */
 export function Logo({ variant = 'icon', size = 'md', className, showText = true }: LogoProps) {
-  const sizeClasses = {
-    sm: 'w-6 h-6',
-    md: 'w-10 h-10',
-    lg: 'w-16 h-16',
-    xl: 'w-24 h-24',
-  };
-
   const textSizeClasses = {
     sm: 'text-sm',
     md: 'text-xl',

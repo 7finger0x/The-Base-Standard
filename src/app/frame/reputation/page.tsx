@@ -8,7 +8,7 @@
 import type { Metadata } from 'next';
 
 interface PageProps {
-  searchParams: { address?: string };
+  searchParams: Promise<{ address?: string }>;
 }
 
 import { BASE_URL } from '@/lib/env';
@@ -17,10 +17,10 @@ import { BASE_URL } from '@/lib/env';
 const getBaseUrl = () => BASE_URL || 'http://localhost:3000';
 
 export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
-  const address = searchParams.address || '0x0000000000000000000000000000000000000000';
+  const params = await searchParams;
+  const address = params.address || '0x0000000000000000000000000000000000000000';
   const baseUrl = getBaseUrl();
   const frameImageUrl = `${baseUrl}/api/frame/reputation?address=${address}`;
-  const frameUrl = `${baseUrl}/frame/reputation?address=${address}`;
 
   return {
     title: 'The Base Standard - Reputation',
@@ -47,8 +47,9 @@ export async function generateMetadata({ searchParams }: PageProps): Promise<Met
   };
 }
 
-export default function ReputationFramePage({ searchParams }: PageProps) {
-  const address = searchParams.address || '0x0000000000000000000000000000000000000000';
+export default async function ReputationFramePage({ searchParams }: PageProps) {
+  const params = await searchParams;
+  const address = params.address || '0x0000000000000000000000000000000000000000';
 
   return (
     <div className="min-h-screen bg-white">
