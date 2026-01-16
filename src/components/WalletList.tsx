@@ -1,8 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import { useIdentity, useUnlinkWallet, useSetPrimaryWallet } from '@/hooks/useIdentity';
-import { shortenAddress } from '@/lib/utils';
+import { useIdentity } from '@/hooks/useIdentity';
 
 type Wallet = {
   id: string;
@@ -15,9 +13,6 @@ type Wallet = {
 
 export function WalletList() {
   const { data: identity, isLoading } = useIdentity();
-  const { mutate: unlinkWallet, isPending: isUnlinking } = useUnlinkWallet();
-  const { mutate: setPrimary, isPending: isSettingPrimary } = useSetPrimaryWallet();
-  const [showLinkModal, setShowLinkModal] = useState(false);
 
   if (isLoading) {
     return (
@@ -39,14 +34,8 @@ export function WalletList() {
     <div className="p-6 rounded-2xl border border-gray-200 bg-white shadow-sm">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-bold text-gray-700 uppercase tracking-wider">
-          Linked Wallets
+          Connected Wallet
         </h3>
-        <button
-          onClick={() => setShowLinkModal(true)}
-          className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-900 text-sm font-semibold transition-colors"
-        >
-          + Link Wallet
-        </button>
       </div>
 
       <div className="space-y-3">
@@ -56,11 +45,7 @@ export function WalletList() {
             className="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-xl transition-colors hover:border-gray-300"
           >
             <div className="flex items-center gap-3">
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                wallet.isPrimary 
-                  ? 'bg-gradient-to-br from-blue-500 to-purple-600' 
-                  : 'bg-gray-200'
-              }`}>
+              <div className="w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600">
                 <span className="text-xs">💳</span>
               </div>
               <div>
@@ -68,40 +53,17 @@ export function WalletList() {
                   <span className="text-sm font-medium text-gray-900 font-mono">
                     {wallet.address.slice(0, 6)}...{wallet.address.slice(-4)}
                   </span>
-                  {wallet.isPrimary && (
-                    <span className="px-2 py-0.5 text-[10px] font-bold bg-blue-500/20 text-blue-400 rounded-full border border-blue-500/30">
-                      PRIMARY
-                    </span>
-                  )}
+                  <span className="px-2 py-0.5 text-[10px] font-bold bg-blue-500/20 text-blue-400 rounded-full border border-blue-500/30">
+                    BASE SMART WALLET
+                  </span>
                 </div>
-                <span className="font-mono text-xs text-gray-500">
-                  {shortenAddress(wallet.address, 8)}
-                </span>
                 <div className="text-xs text-gray-500">
-                  Added {new Date(wallet.verifiedAt).toLocaleDateString()}
+                  Connected {new Date(wallet.verifiedAt).toLocaleDateString()}
                 </div>
               </div>
             </div>
             <div className="flex items-center gap-2">
-              {!wallet.isPrimary && (
-                <>
-                  <button
-                    onClick={() => setPrimary(wallet.id)}
-                    disabled={isSettingPrimary}
-                    className="px-3 py-1.5 text-xs font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-200 rounded-lg transition-colors disabled:opacity-50"
-                  >
-                    Make Primary
-                  </button>
-                  <button
-                    onClick={() => unlinkWallet(wallet.id)}
-                    disabled={isUnlinking}
-                    className="px-3 py-1.5 text-xs font-medium text-red-400 hover:text-red-300 hover:bg-red-400/10 rounded-lg transition-colors disabled:opacity-50"
-                  >
-                    Unlink
-                  </button>
-                </>
-              )}
-              <button 
+              <button
                 onClick={() => navigator.clipboard.writeText(wallet.address)}
                 className="text-gray-400 hover:text-gray-600 transition-colors p-1 rounded"
                 title="Copy address"
@@ -114,26 +76,6 @@ export function WalletList() {
           </div>
         ))}
       </div>
-
-      {/* Link Modal - Placeholder for now */}
-      {showLinkModal && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 w-full max-w-lg shadow-xl">
-            <div className="flex items-center justify-between mb-6">
-              <h4 className="text-xl font-bold text-gray-900">Link Wallet</h4>
-              <button 
-                onClick={() => setShowLinkModal(false)}
-                className="text-gray-500 hover:text-gray-700 transition-colors"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <p className="text-gray-600">Wallet linking modal coming soon...</p>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

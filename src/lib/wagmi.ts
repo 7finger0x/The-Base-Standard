@@ -7,7 +7,7 @@ export const wagmiConfig = createConfig({
   connectors: [
     coinbaseWallet({
       appName: 'The Base Standard Protocol',
-      preference: 'all', // Allow both smart and EOA wallets
+      preference: 'smartWalletOnly', // Only allow Base Smart Wallet
     }),
   ],
   transports: {
