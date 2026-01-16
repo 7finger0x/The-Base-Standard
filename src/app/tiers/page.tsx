@@ -2,6 +2,9 @@
 
 import { Sidebar } from '@/components/Sidebar';
 import { TierBadge } from '@/components/TierBadge';
+import { TierCardMinter } from '@/components/TierCardMinter';
+import { useAccount } from 'wagmi';
+import { useState, useEffect } from 'react';
 
 const tiers = [
   {
@@ -41,7 +44,58 @@ const tiers = [
   },
 ];
 
+const nftTiers = [
+  {
+    tier: 'BASED' as const,
+    score: 'ELITE STATUS',
+    descriptor: 'Top 5% of Base',
+    mintPrice: '0.005',
+    minScore: 851,
+  },
+  {
+    tier: 'GOLD' as const,
+    score: '850+',
+    descriptor: 'Premium Builder',
+    mintPrice: '0.003',
+    minScore: 850,
+  },
+  {
+    tier: 'SILVER' as const,
+    score: '500-849',
+    descriptor: 'Active Resident',
+    mintPrice: '0.002',
+    minScore: 500,
+  },
+  {
+    tier: 'BRONZE' as const,
+    score: '100-499',
+    descriptor: 'Base Explorer',
+    mintPrice: '0.001',
+    minScore: 100,
+  },
+];
+
 export default function TiersPage() {
+  const { address } = useAccount();
+  const [userScore, setUserScore] = useState<number | undefined>(undefined);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (address) {
+      setIsLoading(true);
+      fetch(`/api/reputation?address=${address}`)
+        .then((res) => res.json())
+        .then((data) => {
+          setUserScore(data.totalScore || 0);
+        })
+        .catch((err) => {
+          console.error('Error fetching reputation:', err);
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
+    }
+  }, [address]);
   return (
     <div className="min-h-screen bg-white">
       <Sidebar />
@@ -91,6 +145,83 @@ export default function TiersPage() {
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* NFT Tier Cards Section */}
+            <div className="mt-16">
+              <div className="border-t border-gray-200 pt-12">
+                <h2 className="text-3xl font-black text-gray-900 mb-3">
+                  Mint Your Tier NFT
+                </h2>
+                <p className="text-lg text-gray-600 mb-8">
+                  Immortalize your achievement on-chain. Mint an NFT representing your tier status
+                  in The Base Standard reputation system.
+                </p>
+
+                {address && userScore !== undefined && (
+                  <div className="mb-6 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-sm text-blue-600 font-semibold mb-1">
+                          Your Reputation Score
+                        </div>
+                        <div className="text-3xl font-black text-blue-900">{userScore}</div>
+                      </div>
+                      <div className="text-sm text-blue-600">
+                        {isLoading ? 'Loading...' : 'Connected'}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {nftTiers.map((nftTier) => (
+                    <TierCardMinter
+                      key={nftTier.tier}
+                      tier={nftTier.tier}
+                      score={nftTier.score}
+                      descriptor={nftTier.descriptor}
+                      mintPrice={nftTier.mintPrice}
+                      userScore={userScore}
+                      className="w-full"
+                    />
+                  ))}
+                </div>
+
+                <div className="mt-8 p-6 bg-gradient-to-r from-purple-50 to-blue-50 border border-purple-200 rounded-xl">
+                  <h3 className="text-lg font-bold text-gray-900 mb-3">About Tier NFTs</h3>
+                  <ul className="space-y-2 text-sm text-gray-700">
+                    <li className="flex items-start gap-2">
+                      <span className="text-purple-600 mt-0.5">•</span>
+                      <span>
+                        <strong>Permanent Record:</strong> Your tier NFT is a permanent on-chain
+                        record of your achievement in The Base Standard ecosystem.
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-purple-600 mt-0.5">•</span>
+                      <span>
+                        <strong>Eligibility:</strong> You must meet the minimum score requirement
+                        to mint a tier NFT. Keep building your reputation to unlock higher tiers!
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-purple-600 mt-0.5">•</span>
+                      <span>
+                        <strong>Collectible:</strong> Each tier has a unique design featuring
+                        The Base Standard logo and your tier status.
+                      </span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="text-purple-600 mt-0.5">•</span>
+                      <span>
+                        <strong>Future Utility:</strong> Tier NFTs may unlock exclusive benefits,
+                        governance rights, and special access in future ecosystem developments.
+                      </span>
+                    </li>
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
         </div>
