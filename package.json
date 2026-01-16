@@ -6,6 +6,7 @@
     "apps/*"
   ],
   "scripts": {
+    "postinstall": "prisma generate || echo 'Prisma generate skipped'",
     "dev": "next dev",
     "build": "prisma generate && next build",
     "start": "next start",
@@ -33,16 +34,22 @@
     "db:pull": "prisma db pull"
   },
   "dependencies": {
+    "@auth/prisma-adapter": "^2.11.1",
     "@coinbase/onchainkit": "^0.36.11",
     "@farcaster/frame-sdk": "^0.1.0",
     "@neondatabase/serverless": "^1.0.2",
-    "@prisma/adapter-neon": "^7.2.0",
-    "@prisma/client": "^7.2.0",
+    "@prisma/client": "^4.16.2",
+    "@statsig/react-bindings": "^3.31.2",
+    "@statsig/session-replay": "^3.31.2",
+    "@statsig/web-analytics": "^3.31.2",
     "@tanstack/react-query": "^5.90.16",
     "@vercel/speed-insights": "^1.3.1",
     "clsx": "^2.1.0",
+    "inngest": "^3.49.2",
+    "lucide-react": "^0.562.0",
     "next": "^15.0.0",
-    "prisma": "^7.2.0",
+    "next-auth": "^5.0.0-beta.30",
+    "prisma": "^4.16.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwind-merge": "^2.5.0",

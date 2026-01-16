@@ -61,9 +61,9 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    // Try PVC framework calculation (if enabled)
-    const usePVC = process.env.ENABLE_PVC_SCORING === 'true';
-    
+    // Try PVC framework calculation (enabled by default)
+    const usePVC = process.env.DISABLE_PVC_SCORING !== 'true';
+
     if (usePVC) {
       try {
         const pvcScore = await calculateReputationScore(address);

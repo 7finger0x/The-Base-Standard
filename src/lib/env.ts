@@ -16,6 +16,9 @@ const envSchema = z.object({
   // OnchainKit API
   NEXT_PUBLIC_ONCHAINKIT_API_KEY: z.string().optional(),
 
+  // BaseScan API (for on-chain data fetching)
+  BASESCAN_API_KEY: z.string().optional(),
+
   // Ponder Indexer
   PONDER_URL: z.string().url().or(z.literal('')).optional().default('http://localhost:42069'),
   PONDER_RPC_URL_BASE: z.string().url().or(z.literal('')).optional(),

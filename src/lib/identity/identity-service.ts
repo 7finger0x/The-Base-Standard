@@ -9,6 +9,7 @@ import { prisma } from '@/lib/db';
 import type { Address } from 'viem';
 import { verifySIWESignature, parseSIWEMessage, validateSIWEMessage } from './siwe';
 import { RequestLogger } from '@/lib/request-logger';
+import type { Wallet, Account } from '@/types/prisma';
 
 export interface LinkWalletRequest {
   address: Address;
@@ -374,7 +375,7 @@ export class IdentityService {
       return null;
     }
 
-    const primaryWallet = user.wallets.find(w => w.isPrimary) || user.wallets[0];
+    const primaryWallet = user.wallets.find((w: Wallet) => w.isPrimary) || user.wallets[0];
 
     return {
       id: user.id,
@@ -391,7 +392,7 @@ export class IdentityService {
         chainType: primaryWallet.chainType,
         label: primaryWallet.label,
       } : null,
-      wallets: user.wallets.map(w => ({
+      wallets: user.wallets.map((w: Wallet) => ({
         id: w.id,
         address: w.address,
         chainType: w.chainType,
@@ -399,7 +400,7 @@ export class IdentityService {
         isPrimary: w.isPrimary,
         verifiedAt: w.verifiedAt,
       })),
-      socialAccounts: user.accounts.map(a => ({
+      socialAccounts: user.accounts.map((a: Account) => ({
         id: a.id,
         provider: a.provider,
         providerUsername: a.providerUsername,
