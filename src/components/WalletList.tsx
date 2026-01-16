@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useIdentity, useUnlinkWallet, useSetPrimaryWallet } from '@/hooks/useIdentity';
+import { LinkWalletModal } from '@/components/LinkWalletModal';
 import { shortenAddress } from '@/lib/utils';
 
 type Wallet = {
@@ -31,26 +32,36 @@ export function WalletList() {
     );
   }
 
-  if (!identity?.wallets?.length) {
-    return null;
-  }
+  const wallets = identity?.wallets || [];
 
   return (
-    <div className="p-6 rounded-2xl border border-gray-200 bg-white shadow-sm">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-bold text-gray-700 uppercase tracking-wider">
-          Linked Wallets
-        </h3>
-        <button
-          onClick={() => setShowLinkModal(true)}
-          className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-900 text-sm font-semibold transition-colors"
-        >
-          + Link Wallet
-        </button>
-      </div>
+    <>
+      <div className="p-6 rounded-2xl border border-gray-200 bg-white shadow-sm">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-lg font-bold text-gray-700 uppercase tracking-wider">
+            Linked Wallets
+          </h3>
+          <button
+            onClick={() => setShowLinkModal(true)}
+            className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-900 text-sm font-semibold transition-colors"
+          >
+            + Link Wallet
+          </button>
+        </div>
 
-      <div className="space-y-3">
-        {identity.wallets.map((wallet: Wallet) => (
+        {wallets.length === 0 ? (
+          <div className="text-center py-8">
+            <p className="text-gray-500 mb-4">No wallets linked yet</p>
+            <button
+              onClick={() => setShowLinkModal(true)}
+              className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition-colors"
+            >
+              Link Your First Wallet
+            </button>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {wallets.map((wallet: Wallet) => (
           <div
             key={wallet.id}
             className="flex items-center justify-between p-4 bg-gray-50 border border-gray-200 rounded-xl transition-colors hover:border-gray-300"
@@ -112,28 +123,16 @@ export function WalletList() {
               </button>
             </div>
           </div>
-        ))}
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Link Modal - Placeholder for now */}
-      {showLinkModal && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-          <div className="bg-white border border-gray-200 rounded-2xl p-6 w-full max-w-lg shadow-xl">
-            <div className="flex items-center justify-between mb-6">
-              <h4 className="text-xl font-bold text-gray-900">Link Wallet</h4>
-              <button 
-                onClick={() => setShowLinkModal(false)}
-                className="text-gray-500 hover:text-gray-700 transition-colors"
-              >
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-            <p className="text-gray-600">Wallet linking modal coming soon...</p>
-          </div>
-        </div>
-      )}
-    </div>
+      <LinkWalletModal
+        isOpen={showLinkModal}
+        onClose={() => setShowLinkModal(false)}
+        linkedWallets={wallets}
+      />
+    </>
   );
 }

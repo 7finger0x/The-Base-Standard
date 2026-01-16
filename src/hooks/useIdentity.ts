@@ -101,18 +101,24 @@ export function useLinkWallet() {
         throw new Error('Authentication required. Please sign in first.');
       }
 
+      // Verify that the currently connected wallet matches the address we want to link
+      // This ensures the signature will be valid
+      if (currentAddress.toLowerCase() !== newAddress.toLowerCase()) {
+        throw new Error(`Wallet mismatch. Please connect the wallet ${newAddress.slice(0, 6)}...${newAddress.slice(-4)} first.`);
+      }
+
       // Step 1: Get nonce
       const nonceResponse = await fetch('/api/identity/nonce');
       const nonceData = await nonceResponse.json();
       const nonce = nonceData.data.nonce;
 
-      // Step 2: Generate SIWE message
+      // Step 2: Generate SIWE message for the currently connected wallet
       const domain = process.env.NEXT_PUBLIC_APP_DOMAIN || 'base-standard.xyz';
       const uri = window.location.origin;
       const siweMessage = generateSIWEMessage({
         domain,
-        address: newAddress,
-        statement: `Link wallet ${newAddress} to your account`,
+        address: currentAddress, // Use currentAddress to match the signing wallet
+        statement: `Link wallet ${currentAddress} to your account`,
         uri,
         version: '1',
         chainId: chainId || 8453,
@@ -120,13 +126,13 @@ export function useLinkWallet() {
         expirationTime: new Date(Date.now() + 15 * 60 * 1000).toISOString(), // 15 min
       });
 
-      // Step 3: Sign message with new wallet
-      // Note: User must switch to new wallet in their extension
+      // Step 3: Sign message with currently connected wallet
       const signature = await signMessageAsync({
         message: siweMessage,
       });
 
       // Step 4: Submit to backend (session cookie is automatically sent)
+      // Use currentAddress (which matches newAddress after validation) to ensure consistency
       const response = await fetch('/api/identity/link-wallet', {
         method: 'POST',
         headers: {
@@ -134,7 +140,7 @@ export function useLinkWallet() {
         },
         credentials: 'include', // Include session cookies
         body: JSON.stringify({
-          address: newAddress,
+          address: currentAddress, // Use currentAddress to match the signed message
           chainType: 'EVM',
           siweMessage,
           signature,

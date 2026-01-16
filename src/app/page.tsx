@@ -14,6 +14,7 @@ import {
   Address,
 } from '@coinbase/onchainkit/identity';
 import { Sidebar } from '@/components/Sidebar';
+import { Logo } from '@/components/Logo';
 import { MetricCard, BaseTenureGraphic, ZoraMintsGraphic, ReputationScoreGraphic, EarlyAdopterGraphic } from '@/components/MetricCard';
 import { RankCard } from '@/components/RankCard';
 import { WalletList } from '@/components/WalletList';
@@ -90,6 +91,10 @@ export default function HomePage() {
               </div>
 
               <div className="relative max-w-4xl">
+                {/* Logo */}
+                <div className="mb-8">
+                  <Logo variant="full" size="xl" />
+                </div>
                 <h1 className="text-6xl md:text-7xl font-black text-gray-900 leading-tight mb-8">
                   A verifiable reputation system, built by all of us
                 </h1>
