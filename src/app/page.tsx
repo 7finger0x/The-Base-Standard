@@ -172,7 +172,7 @@ export default function HomePage() {
                 <ScoreBreakdown />
               </div>
 
-              <div className="mt-6">
+              <div id="wallet-section" className="mt-6 scroll-mt-8">
                 <WalletList />
               </div>
             </div>

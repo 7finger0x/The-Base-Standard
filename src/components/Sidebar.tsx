@@ -84,12 +84,17 @@ export function Sidebar() {
                 >
                   View Your Score
                 </Link>
-                <Link
-                  href="/"
-                  className="block w-full px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg text-sm font-medium transition-colors text-center"
+                <button
+                  onClick={() => {
+                    const walletSection = document.getElementById('wallet-section');
+                    if (walletSection) {
+                      walletSection.scrollIntoView({ behavior: 'smooth' });
+                    }
+                  }}
+                  className="w-full px-4 py-3 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-lg text-sm font-medium transition-colors text-center"
                 >
                   Manage Wallets
-                </Link>
+                </button>
               </>
             ) : (
               <>
