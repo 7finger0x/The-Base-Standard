@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi';
 import { ConnectWallet } from '@coinbase/onchainkit/wallet';
-import { TierCard } from './TierCard';
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 interface TierCardMinterProps {
@@ -34,6 +34,14 @@ const TIER_IDS = {
   SILVER: 2,
   GOLD: 3,
   BASED: 4,
+};
+
+// Tier card image mappings
+const TIER_IMAGES = {
+  BRONZE: '/images/tiers/bronze.png',
+  SILVER: '/images/tiers/silver.png',
+  GOLD: '/images/tiers/gold.png',
+  BASED: '/images/tiers/based.png',
 };
 
 export function TierCardMinter({
@@ -83,8 +91,16 @@ export function TierCardMinter({
 
   return (
     <div className={cn('flex flex-col gap-4', className)}>
-      {/* Tier Card Display */}
-      <TierCard tier={tier} score={score} descriptor={descriptor} />
+      {/* Tier Card Image Display */}
+      <div className="relative w-full aspect-[4/5] rounded-xl overflow-hidden shadow-2xl">
+        <Image
+          src={TIER_IMAGES[tier]}
+          alt={`${tier} Tier Card - ${score}`}
+          fill
+          className="object-cover"
+          priority
+        />
+      </div>
 
       {/* Minting Section */}
       <div className="bg-gradient-to-br from-gray-900 to-black rounded-lg p-6 border border-gray-800">
