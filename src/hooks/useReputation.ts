@@ -50,7 +50,9 @@ async function fetchReputation(address: string): Promise<ReputationData> {
   if (!response.ok) {
     throw new Error('Failed to fetch reputation');
   }
-  return response.json();
+  const json = await response.json();
+  // API wraps response in { success: true, data: {...} }
+  return json.data || json;
 }
 
 export function useReputation(address: string | undefined) {
