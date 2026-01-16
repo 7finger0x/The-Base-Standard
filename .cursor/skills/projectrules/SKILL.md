@@ -31,7 +31,7 @@ description: This is a new rule
 - Use `lucide-react` for icons.
 - Use `clsx` or `tailwind-merge` for dynamic classes.
 - Place all business logic in `src/lib/`. UI components should be logic-light.
-- Security: Add `import 'server-only'` to all files in `src/lib/scoring/` and `src/lib/db/`.
+- Security: Add `import 'server-only'` to all files in `src/lib/scoring/` and `src/lib/db.ts` (or `src/lib/db/` if using directory structure).
 
 # TypeScript
 - Prefer `interface` over `type` for object definitions.
@@ -56,12 +56,12 @@ description: This is a new rule
 8. Hackathons/Events: Badge counts.
 9. Early Adopter: First 100k users on Base, Zora, or Farcaster.
 
-# Tier Thresholds (Total Score)
-- Novice: 0-99
-- Bronze: 100-499
-- Silver: 500-849
-- Gold: 850-999
-- BASED: 1000+ (Unlocks 0.002 ETH Mint)
+# Tier Thresholds (Total Score - Recalibrated 0-1000 scale)
+- TOURIST: 0-350 (Bottom 40%)
+- RESIDENT: 351-650 (40th-75th percentile)
+- BUILDER: 651-850 (75th-95th percentile)
+- BASED: 851-950 (Top 5% - 95th-99th percentile)
+- LEGEND: 951-1000 (Top 1%)
 
 # Identity Aggregation
 - Users link wallets via EIP-712 signatures.
@@ -100,7 +100,7 @@ description: This is a new rule
 - `src/app/` -> Routes & Pages
 - `src/components/` -> React Components
 - `src/lib/` -> Core Logic (Scoring, Utils, Constants)
-- `src/lib/db/` -> Prisma Client & DAO
+- `src/lib/db.ts` or `src/lib/db/` -> Prisma Client & DAO (single file acceptable for simple setups)
 - `foundry/` -> Smart Contract Workspace
 - `foundry/src/` -> Solidity Contracts
 - `foundry/script/` -> Deployment Scripts

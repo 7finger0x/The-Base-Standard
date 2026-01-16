@@ -70,7 +70,7 @@ export class DatabaseService {
     const newScore = user.score + (input.points * (input.multiplier ?? 1.0));
     const newTier = this.calculateTier(newScore);
 
-    return await prisma.user.update({
+    const updatedUser = await prisma.user.update({
       where: { id: user.id },
       data: {
         score: newScore,
@@ -78,6 +78,32 @@ export class DatabaseService {
         lastUpdated: new Date(),
       },
     });
+
+    // Store reputation snapshot on IPFS (if configured)
+    try {
+      const { storeReputationSnapshotIfConfigured } = await import('@/lib/storage/reputation-snapshot');
+      
+      await storeReputationSnapshotIfConfigured({
+        address: input.address,
+        score: Math.floor(newScore),
+        tier: newTier,
+        breakdown: input.metadata as { tenure?: number; economic?: number; social?: number } | undefined,
+      });
+      
+      // Invalidate frame cache for this address
+      try {
+        const { revalidateReputationCache } = await import('@/lib/cache/revalidate');
+        await revalidateReputationCache(input.address);
+      } catch (revalidateError) {
+        // Revalidation is optional, don't fail if it errors
+        console.warn('Frame cache revalidation failed:', revalidateError);
+      }
+    } catch (error) {
+      // Log error but don't fail the update
+      console.error('Failed to store reputation snapshot on IPFS:', error);
+    }
+
+    return updatedUser;
   }
 
   async getTopUsers(limit: number = 100): Promise<User[]> {

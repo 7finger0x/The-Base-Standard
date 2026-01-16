@@ -32,6 +32,17 @@ const envSchema = z.object({
   // Inngest
   INNGEST_EVENT_KEY: z.string().optional(),
   INNGEST_SIGNING_KEY: z.string().optional(),
+
+  // IPFS / Pinata Storage
+  PINATA_JWT_TOKEN: z.string().optional(),
+  NEXT_PUBLIC_PINATA_GATEWAY: z.string().optional().default('gateway.pinata.cloud'),
+
+  // Chainlink Integration
+  CHAINLINK_FUNCTIONS_ROUTER: z.string().startsWith('0x').length(42).optional(),
+  CHAINLINK_AUTOMATION_REGISTRY: z.string().startsWith('0x').length(42).optional(),
+
+  // Base URL for Frames
+  NEXT_PUBLIC_BASE_URL: z.string().url().or(z.literal('')).optional().default('http://localhost:3000'),
 });
 
 // Type inference from schema
@@ -72,7 +83,9 @@ function validateEnvironment(): EnvVariables {
 export const env = validateEnvironment();
 
 // Helper function to check if required services are configured
-export function isServiceConfigured(service: 'ponder' | 'cdp' | 'farcaster'): boolean {
+export function isServiceConfigured(
+  service: 'ponder' | 'cdp' | 'farcaster' | 'ipfs' | 'chainlink'
+): boolean {
   switch (service) {
     case 'ponder':
       return !!env.PONDER_URL && env.PONDER_URL !== 'http://localhost:42069';
@@ -80,6 +93,10 @@ export function isServiceConfigured(service: 'ponder' | 'cdp' | 'farcaster'): bo
       return !!env.CDP_KEY_NAME && !!env.CDP_PRIVATE_KEY;
     case 'farcaster':
       return !!env.NEXT_PUBLIC_FARCASTER_HUB_URL;
+    case 'ipfs':
+      return !!env.PINATA_JWT_TOKEN;
+    case 'chainlink':
+      return !!env.CHAINLINK_AUTOMATION_REGISTRY && !!env.CHAINLINK_FUNCTIONS_ROUTER;
     default:
       return false;
   }
@@ -94,3 +111,5 @@ export const isTest = env.NODE_ENV === 'test';
 export const PONDER_URL = env.PONDER_URL;
 export const BASE_RPC_URL = env.NEXT_PUBLIC_BASE_RPC_URL || 'https://mainnet.base.org';
 export const ZORA_RPC_URL = env.PONDER_RPC_URL_ZORA || 'https://rpc.zora.energy';
+export const PINATA_GATEWAY = env.NEXT_PUBLIC_PINATA_GATEWAY;
+export const BASE_URL = env.NEXT_PUBLIC_BASE_URL;

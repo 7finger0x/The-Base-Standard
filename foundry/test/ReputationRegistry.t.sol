@@ -448,6 +448,178 @@ contract ReputationRegistryTest is Test {
         bytes32 hash1 = registry.hashTypedData(structHash1);
         bytes32 hash2 = registry.hashTypedData(structHash2);
 
-        assertTrue(hash1 != hash2);
+        bool hashesDifferent = hash1 != hash2;
+        assertTrue(hashesDifferent);
+    }
+
+    // ========== Chainlink Automation Tests ==========
+
+    function test_SetAutomationRegistry() public {
+        address mockRegistry = address(0x1234);
+        registry.setAutomationRegistry(mockRegistry);
+        assertEq(registry.automationRegistry(), mockRegistry);
+    }
+
+    function test_RevertWhen_SetAutomationRegistry_NotOwner() public {
+        address mockRegistry = address(0x1234);
+        vm.prank(mainWallet);
+        vm.expectRevert(Ownable.Unauthorized.selector);
+        registry.setAutomationRegistry(mockRegistry);
+    }
+
+    function test_MarkForUpdate() public {
+        registry.markForUpdate(mainWallet);
+        assertTrue(registry.needsUpdate(mainWallet));
+        assertEq(registry.getPendingUpdatesCount(), 1);
+        
+        address[] memory pending = registry.getPendingUpdates();
+        assertEq(pending.length, 1);
+        assertEq(pending[0], mainWallet);
+    }
+
+    function test_MarkForUpdate_DoesNotDuplicate() public {
+        registry.markForUpdate(mainWallet);
+        registry.markForUpdate(mainWallet); // Should not add duplicate
+        assertEq(registry.getPendingUpdatesCount(), 1);
+    }
+
+    function test_BatchMarkForUpdate() public {
+        address[] memory users = new address[](3);
+        users[0] = mainWallet;
+        users[1] = secWallet;
+        users[2] = vm.addr(0xCA7);
+
+        registry.batchMarkForUpdate(users);
+        assertEq(registry.getPendingUpdatesCount(), 3);
+        assertTrue(registry.needsUpdate(mainWallet));
+        assertTrue(registry.needsUpdate(secWallet));
+        assertTrue(registry.needsUpdate(users[2]));
+    }
+
+    function test_RevertWhen_MarkForUpdate_NotOwner() public {
+        vm.prank(mainWallet);
+        vm.expectRevert(Ownable.Unauthorized.selector);
+        registry.markForUpdate(secWallet);
+    }
+
+    function test_CheckUpkeep_ReturnsFalse_WhenNoPendingUpdates() public {
+        (bool upkeepNeeded, bytes memory performData) = registry.checkUpkeep("");
+        assertFalse(upkeepNeeded);
+        // performData will contain encoded empty array (not truly empty)
+        address[] memory decoded = abi.decode(performData, (address[]));
+        assertEq(decoded.length, 0);
+    }
+
+    function test_CheckUpkeep_ReturnsTrue_WhenPendingUpdates() public {
+        registry.markForUpdate(mainWallet);
+        registry.markForUpdate(secWallet);
+
+        (bool upkeepNeeded, bytes memory performData) = registry.checkUpkeep("");
+        assertTrue(upkeepNeeded);
+        
+        address[] memory decoded = abi.decode(performData, (address[]));
+        assertEq(decoded.length, 2);
+        assertEq(decoded[0], mainWallet);
+        assertEq(decoded[1], secWallet);
+    }
+
+    function test_PerformUpkeep_AsOwner_WhenRegistryNotSet() public {
+        registry.markForUpdate(mainWallet);
+        registry.markForUpdate(secWallet);
+
+        // Owner can perform upkeep when registry not set (for testing)
+        registry.performUpkeep(abi.encode(registry.getPendingUpdates()));
+
+        assertEq(registry.getPendingUpdatesCount(), 0);
+        assertFalse(registry.needsUpdate(mainWallet));
+        assertFalse(registry.needsUpdate(secWallet));
+    }
+
+    function test_PerformUpkeep_AsAutomationRegistry() public {
+        address mockRegistry = address(0x1234);
+        registry.setAutomationRegistry(mockRegistry);
+        registry.markForUpdate(mainWallet);
+
+        address[] memory pending = registry.getPendingUpdates();
+        bytes memory performData = abi.encode(pending);
+
+        vm.prank(mockRegistry);
+        registry.performUpkeep(performData);
+
+        assertEq(registry.getPendingUpdatesCount(), 0);
+        assertFalse(registry.needsUpdate(mainWallet));
+    }
+
+    function test_RevertWhen_PerformUpkeep_NotAuthorized() public {
+        address mockRegistry = address(0x1234);
+        registry.setAutomationRegistry(mockRegistry);
+        registry.markForUpdate(mainWallet);
+
+        address[] memory pending = registry.getPendingUpdates();
+        bytes memory performData = abi.encode(pending);
+
+        vm.prank(mainWallet); // Not owner or registry
+        vm.expectRevert(); // Expect any revert (error format may vary)
+        registry.performUpkeep(performData);
+    }
+
+    function test_RevertWhen_PerformUpkeep_EmptyAddresses() public {
+        bytes memory emptyData = abi.encode(new address[](0));
+        vm.expectRevert(ReputationRegistry.UpkeepNotNeeded.selector);
+        registry.performUpkeep(emptyData);
+    }
+
+    function test_GetPendingUpdates() public {
+        registry.markForUpdate(mainWallet);
+        registry.markForUpdate(secWallet);
+        registry.markForUpdate(vm.addr(0xCA7));
+
+        address[] memory pending = registry.getPendingUpdates();
+        assertEq(pending.length, 3);
+    }
+
+    function test_GetPendingUpdatesCount() public {
+        assertEq(registry.getPendingUpdatesCount(), 0);
+        
+        registry.markForUpdate(mainWallet);
+        assertEq(registry.getPendingUpdatesCount(), 1);
+        
+        registry.markForUpdate(secWallet);
+        assertEq(registry.getPendingUpdatesCount(), 2);
+    }
+
+    function test_PerformUpkeep_ClearsPendingUpdates() public {
+        registry.markForUpdate(mainWallet);
+        registry.markForUpdate(secWallet);
+        assertEq(registry.getPendingUpdatesCount(), 2);
+
+        address[] memory pending = registry.getPendingUpdates();
+        registry.performUpkeep(abi.encode(pending));
+
+        assertEq(registry.getPendingUpdatesCount(), 0);
+        address[] memory empty = registry.getPendingUpdates();
+        assertEq(empty.length, 0);
+    }
+
+    function test_AutomationFlow_Complete() public {
+        // 1. Mark addresses for update
+        registry.markForUpdate(mainWallet);
+        registry.markForUpdate(secWallet);
+        
+        // 2. Check upkeep
+        (bool upkeepNeeded, bytes memory performData) = registry.checkUpkeep("");
+        assertTrue(upkeepNeeded);
+        
+        // 3. Perform upkeep (as owner, since registry not set)
+        registry.performUpkeep(performData);
+        
+        // 4. Verify cleanup
+        assertEq(registry.getPendingUpdatesCount(), 0);
+        assertFalse(registry.needsUpdate(mainWallet));
+        assertFalse(registry.needsUpdate(secWallet));
+        
+        // 5. Check upkeep again (should return false)
+        (upkeepNeeded, performData) = registry.checkUpkeep("");
+        assertFalse(upkeepNeeded);
     }
 }

@@ -127,10 +127,33 @@ model ActivityLog {
 }
 
 model LeaderboardSnapshot {
-  id         String   @id @default(uuid())
+  id         String   @id @default(cuid())
   timestamp  DateTime @default(now())
   topUsers   String
   totalUsers Int
 
   @@index([timestamp])
+}
+
+model ReputationSnapshot {
+  id        String   @id @default(cuid())
+  address   String
+  score     Int
+  tier      String
+  ipfsCid   String?
+  ipfsUrl   String?
+  createdAt DateTime @default(now())
+  
+  @@index([address])
+  @@index([createdAt])
+}
+
+model ReputationBadge {
+  id        String   @id @default(cuid())
+  address   String
+  tokenId   Int      @unique
+  tier      String
+  mintedAt  DateTime @default(now())
+  
+  @@index([address])
 }

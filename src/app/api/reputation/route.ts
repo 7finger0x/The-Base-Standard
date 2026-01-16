@@ -69,6 +69,26 @@ export async function GET(request: NextRequest) {
         const pvcScore = await calculateReputationScore(address);
         const rankData = await dbService.getUserRank(address);
         
+        // Store snapshot on IPFS (async, non-blocking)
+        // Only store if score has changed significantly or is first calculation
+        const { storeReputationSnapshotIfConfigured } = await import('@/lib/storage/reputation-snapshot');
+        storeReputationSnapshotIfConfigured({
+          address,
+          score: pvcScore.totalScore,
+          tier: pvcScore.tier,
+          breakdown: {
+            tenure: pvcScore.breakdown.tenure,
+            economic: pvcScore.breakdown.economic,
+            social: pvcScore.breakdown.social,
+          },
+        }).catch((err) => {
+          // Log but don't block response
+          RequestLogger.logWarning('Failed to store PVC snapshot', {
+            address,
+            error: err instanceof Error ? err.message : 'Unknown error',
+          });
+        });
+        
         const response = NextResponse.json(success({
           address: address,
           totalScore: pvcScore.totalScore,

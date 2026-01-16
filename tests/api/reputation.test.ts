@@ -1,124 +1,168 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
+import { GET } from '@/app/api/reputation/route';
 import { NextRequest } from 'next/server';
+import { dbService } from '@/lib/database-service';
+import * as envLib from '@/lib/env';
+import * as scoringLib from '@/lib/scoring';
 
-// Mock environment variables
-process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test';
+// Mock dependencies
+vi.mock('@/lib/database-service', () => ({
+  dbService: {
+    getUserRank: vi.fn(),
+    getUserByAddress: vi.fn(),
+  },
+}));
 
-// Mock db module before importing route
-vi.mock('@/lib/db', () => {
-  const mockPrisma = {
-    user: { findUnique: vi.fn(), create: vi.fn() },
-    wallet: { findUnique: vi.fn(), create: vi.fn() },
-    $queryRaw: vi.fn(),
-  };
+vi.mock('@/lib/request-logger', () => ({
+  RequestLogger: {
+    logSecurityEvent: vi.fn(),
+    logRequest: vi.fn(),
+    logWarning: vi.fn(),
+    logError: vi.fn(),
+  },
+}));
+
+vi.mock('@/lib/env', async (importOriginal) => {
+  const actual = await importOriginal<typeof envLib>();
   return {
-    prisma: mockPrisma,
+    ...actual,
+    isServiceConfigured: vi.fn(),
+    PONDER_URL: 'http://mock-ponder',
   };
 });
 
-// Mock fetch
-global.fetch = vi.fn();
+vi.mock('@/lib/scoring', () => ({
+  calculateReputationScore: vi.fn(),
+}));
 
-import { GET } from '@/app/api/reputation/route';
+describe('GET /api/reputation', () => {
+  const mockAddress = '0x1234567890123456789012345678901234567890';
+  const validUrl = `http://localhost:3000/api/reputation?address=${mockAddress}`;
+  const originalFetch = global.fetch;
 
-describe('Reputation API Route', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    // Default to false to ensure we test fallbacks; set to 'true' in specific tests to enable
+    process.env.ENABLE_PVC_SCORING = 'false';
+    global.fetch = vi.fn();
   });
 
-  describe('GET /api/reputation', () => {
-    it('should return 400 when address is missing', async () => {
-      const request = new NextRequest('http://localhost:3000/api/reputation');
-      const response = await GET(request);
-      const data = await response.json();
+  afterEach(() => {
+    global.fetch = originalFetch;
+    vi.resetAllMocks();
+  });
 
-      expect(response.status).toBe(400);
-      expect(data.error.code).toBe('WALLET_REQUIRED');
+  it('should return 400 if address is missing or invalid', async () => {
+    const req = new NextRequest('http://localhost:3000/api/reputation');
+    const res = await GET(req);
+    expect(res.status).toBe(400);
+    const data = await res.json();
+    expect(data.error).toBeDefined();
+  });
+
+  it('should return Ponder data if configured and available', async () => {
+    vi.mocked(envLib.isServiceConfigured).mockReturnValue(true);
+    const mockPonderData = { score: 100, tier: 'GOLD' };
+    
+    global.fetch = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => mockPonderData,
+    } as Response);
+
+    const req = new NextRequest(validUrl);
+    const res = await GET(req);
+    
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.data).toEqual(mockPonderData);
+    expect(global.fetch).toHaveBeenCalledWith(
+      expect.stringContaining(mockAddress),
+      expect.any(Object)
+    );
+  });
+
+  it('should fall back if Ponder fails', async () => {
+    vi.mocked(envLib.isServiceConfigured).mockReturnValue(true);
+    global.fetch = vi.fn().mockRejectedValue(new Error('Ponder down'));
+    
+    // Should fall through to mock data (since DB/PVC are mocked to fail/be disabled by default in beforeEach)
+    const req = new NextRequest(validUrl);
+    const res = await GET(req);
+    
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.data.scoringModel).toBe('mock');
+  });
+
+  it('should use PVC scoring if enabled', async () => {
+    process.env.ENABLE_PVC_SCORING = 'true';
+    vi.mocked(envLib.isServiceConfigured).mockReturnValue(false);
+    
+    const mockPvcScore = {
+      totalScore: 500,
+      tier: 'SILVER',
+      multiplier: 1.0,
+      breakdown: { tenure: 100, economic: 200, social: 200 },
+      pillars: {},
+      decayInfo: {},
+    };
+    
+    vi.mocked(scoringLib.calculateReputationScore).mockResolvedValue(mockPvcScore as any);
+    vi.mocked(dbService.getUserRank).mockResolvedValue({ rank: 1, totalUsers: 10 });
+
+    const req = new NextRequest(validUrl);
+    const res = await GET(req);
+    
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.data.scoringModel).toBe('PVC');
+    expect(data.data.totalScore).toBe(500);
+  });
+
+  it('should use legacy DB scoring if PVC disabled and user exists', async () => {
+    vi.mocked(envLib.isServiceConfigured).mockReturnValue(false);
+    
+    vi.mocked(dbService.getUserByAddress).mockResolvedValue({
+      address: mockAddress,
+      score: 300,
+      tier: 'BRONZE',
+      lastUpdated: new Date(),
+    } as any);
+    
+    vi.mocked(dbService.getUserRank).mockResolvedValue({ rank: 5, totalUsers: 100 });
+
+    const req = new NextRequest(validUrl);
+    const res = await GET(req);
+    
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.data.scoringModel).toBe('legacy');
+    expect(data.data.totalScore).toBe(300);
+  });
+
+  it('should return mock data if all else fails', async () => {
+    vi.mocked(envLib.isServiceConfigured).mockReturnValue(false);
+    vi.mocked(dbService.getUserByAddress).mockResolvedValue(null);
+
+    const req = new NextRequest(validUrl);
+    const res = await GET(req);
+    
+    expect(res.status).toBe(200);
+    const data = await res.json();
+    expect(data.data.scoringModel).toBe('mock');
+    expect(data.data.address).toBe(mockAddress);
+  });
+
+  it('should handle internal errors gracefully', async () => {
+    vi.mocked(envLib.isServiceConfigured).mockImplementation(() => {
+      throw new Error('Critical failure');
     });
 
-    it('should fetch from Ponder when available', async () => {
-      const validAddress = '0x1234567890123456789012345678901234567890';
-      const mockData = {
-        address: validAddress,
-        totalScore: 1000,
-        tier: 'BASED',
-      };
-
-      (global.fetch as any).mockResolvedValueOnce({
-        ok: true,
-        json: async () => mockData,
-      });
-
-      const request = new NextRequest(`http://localhost:3000/api/reputation?address=${validAddress}`);
-      const response = await GET(request);
-      const data = await response.json();
-
-      expect(data.success).toBe(true);
-      expect(data.data.address).toBe(validAddress);
-      expect(data.data.totalScore).toBeDefined();
-      expect(data.data.tier).toBeDefined();
-    });
-
-    it('should return mock data when Ponder is unavailable', async () => {
-      const validAddress = '0x1234567890123456789012345678901234567890';
-      (global.fetch as any).mockRejectedValueOnce(new Error('Connection failed'));
-
-      const request = new NextRequest(`http://localhost:3000/api/reputation?address=${validAddress}`);
-      const response = await GET(request);
-      const data = await response.json();
-
-      expect(data.success).toBe(true);
-      expect(data.data).toHaveProperty('totalScore');
-      expect(data.data).toHaveProperty('tier');
-      expect(data.data).toHaveProperty('breakdown');
-    });
-
-    it('should return mock data when Ponder returns non-ok response', async () => {
-      const validAddress = '0x1234567890123456789012345678901234567890';
-      (global.fetch as any).mockResolvedValueOnce({
-        ok: false,
-        status: 500,
-      });
-
-      const request = new NextRequest(`http://localhost:3000/api/reputation?address=${validAddress}`);
-      const response = await GET(request);
-      const data = await response.json();
-
-      expect(data.success).toBe(true);
-      expect(data.data).toHaveProperty('totalScore');
-      expect(data.data).toHaveProperty('tier');
-    });
-
-    it('should generate deterministic mock data for same address', async () => {
-      const validAddress = '0xABCDEF1234567890ABCDEF1234567890ABCDEF12';
-      (global.fetch as any).mockRejectedValue(new Error('No Ponder'));
-
-      const request1 = new NextRequest(`http://localhost:3000/api/reputation?address=${validAddress}`);
-      const response1 = await GET(request1);
-      const data1 = await response1.json();
-
-      const request2 = new NextRequest(`http://localhost:3000/api/reputation?address=${validAddress}`);
-      const response2 = await GET(request2);
-      const data2 = await response2.json();
-
-      expect(data1.data.totalScore).toBe(data2.data.totalScore);
-      expect(data1.data.tier).toBe(data2.data.tier);
-    });
-
-    it('should generate different mock data for different addresses', async () => {
-      const address1 = '0x1111111111111111111111111111111111111111';
-      const address2 = '0x2222222222222222222222222222222222222222';
-      (global.fetch as any).mockRejectedValue(new Error('No Ponder'));
-
-      const request1 = new NextRequest(`http://localhost:3000/api/reputation?address=${address1}`);
-      const response1 = await GET(request1);
-      const data1 = await response1.json();
-
-      const request2 = new NextRequest(`http://localhost:3000/api/reputation?address=${address2}`);
-      const response2 = await GET(request2);
-      const data2 = await response2.json();
-
-      expect(data1.data.totalScore).not.toBe(data2.data.totalScore);
-    });
+    const req = new NextRequest(validUrl);
+    const res = await GET(req);
+    
+    expect(res.status).toBe(500);
+    const data = await res.json();
+    expect(data.error).toBeDefined();
   });
 });

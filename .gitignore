@@ -46,9 +46,18 @@ yarn-error.log*
 
 # Vercel
 .vercel
-
-.vercel
-
 /src/generated/prisma
 
-.vercel
+# Test coverage
+coverage/
+.nyc_output/
+
+# Python (for agent tests)
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Prisma
+prisma/migrations/
+*.prisma.bak
