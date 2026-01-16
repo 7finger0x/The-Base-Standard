@@ -83,6 +83,19 @@ ENABLE_REQUEST_LOGGING=true        # Enable request logging
 DOCKER_BUILD=false                 # Set to true for Docker builds
 ```
 
+### Data Integration APIs (Optional)
+```bash
+# BaseScan API (for transaction history)
+BASESCAN_API_KEY=your-basescan-api-key
+
+# Gitcoin Passport API
+GITCOIN_PASSPORT_API_KEY=your-gitcoin-api-key
+GITCOIN_PASSPORT_SCORER_ID=your-scorer-id
+
+# Zora API (if using direct API instead of Ponder)
+ZORA_API_KEY=your-zora-api-key
+```
+
 ## Development Setup
 
 1. Copy `.env.example` to `.env.local`

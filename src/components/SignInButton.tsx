@@ -33,20 +33,20 @@ export function SignInButton({ className }: { className?: string }) {
     const userAddress = (session.user as any).address || address;
     return (
       <div className={cn('flex items-center gap-3', className)}>
-        <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
-          <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-          <span className="text-sm font-medium text-emerald-400">
+        <div className="flex items-center gap-2 px-4 py-2 rounded-lg bg-emerald-50 border border-emerald-200">
+          <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="text-sm font-medium text-emerald-700">
             Signed In
           </span>
           {userAddress && (
-            <span className="text-xs text-zinc-400 font-mono">
+            <span className="text-xs text-gray-500 font-mono">
               {userAddress.slice(0, 6)}...{userAddress.slice(-4)}
             </span>
           )}
         </div>
         <button
           onClick={() => signOut({ redirect: false })}
-          className="px-4 py-2 text-sm font-medium text-zinc-400 hover:text-white transition-colors rounded-lg hover:bg-zinc-800"
+          className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 transition-colors rounded-lg hover:bg-gray-100 border border-gray-200"
         >
           Sign Out
         </button>
@@ -113,14 +113,14 @@ export function SignInButton({ className }: { className?: string }) {
       </button>
       
       {isError && (
-        <div className="px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-xs">
+        <div className="px-3 py-2 rounded-lg bg-red-50 border border-red-200 text-red-600 text-xs">
           {error instanceof Error ? error.message : 'Sign-in failed. Please try again.'}
         </div>
       )}
       
       {address && !isAuthenticated && !isLoading && (
-        <p className="text-xs text-zinc-500 text-center">
-          Connect your wallet to sign in and link multiple wallets
+        <p className="text-xs text-gray-500 text-center">
+          Sign in to link multiple wallets and access your full reputation profile
         </p>
       )}
     </div>
