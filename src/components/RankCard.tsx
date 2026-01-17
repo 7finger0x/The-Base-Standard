@@ -3,6 +3,7 @@
 import { useAccount } from 'wagmi';
 import { useReputation } from '@/hooks/useReputation';
 import { TierBadge } from '@/components/TierBadge';
+import { TierBadgeCompact } from '@/components/ScoreTierDisplay';
 
 export function RankCard() {
   const { address } = useAccount();
@@ -66,17 +67,20 @@ export function RankCard() {
       </div>
 
       <div className="mb-8">
-        <div className="flex justify-between items-end mb-2">
-          <span className="text-sm text-gray-500">Total Score</span>
-          <span className="text-2xl font-bold text-gray-900">{reputation.totalScore}</span>
+        <div className="flex justify-between items-center mb-3">
+          <span className="text-sm text-gray-500 dark:text-gray-400">Total Score</span>
+          <div className="flex items-center gap-3">
+            <span className="text-3xl font-black text-gray-900 dark:text-white">{reputation.totalScore}</span>
+            <TierBadgeCompact score={reputation.totalScore} />
+          </div>
         </div>
-        <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
-          <div 
+        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+          <div
             className="h-full bg-gradient-to-r from-blue-600 to-purple-600 rounded-full transition-all duration-1000"
             style={{ width: `${Math.min(100, (reputation.totalScore / 1000) * 100)}%` }}
           />
         </div>
-        <div className="flex justify-between mt-1 text-xs text-gray-500">
+        <div className="flex justify-between mt-1 text-xs text-gray-500 dark:text-gray-400">
           <span>0</span>
           <span>1000</span>
         </div>

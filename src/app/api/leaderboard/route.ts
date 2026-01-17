@@ -44,16 +44,25 @@ export async function GET(request: NextRequest) {
       return response;
     }
   } catch (error) {
-    RequestLogger.logWarning('Ponder not available, using mock data', {
+    RequestLogger.logWarning('Ponder not available, returning empty leaderboard', {
       limit,
       offset,
       error: error instanceof Error ? error.message : 'Unknown error',
     });
   }
 
-  // Fallback mock leaderboard
-  const mockLeaderboard = generateMockLeaderboard(limit, offset);
-  const response = NextResponse.json(mockLeaderboard);
+  // Return empty leaderboard when Ponder is not available
+  // Leaderboard will only show real users who have minted NFTs
+  const emptyLeaderboard = {
+    leaderboard: [],
+    pagination: {
+      limit,
+      offset,
+      hasMore: false,
+      total: 0,
+    },
+  };
+  const response = NextResponse.json(emptyLeaderboard);
   addCorsHeaders(response, request.headers.get('origin'));
   RequestLogger.logRequest(request, 200, Date.now() - startTime);
   return response;
