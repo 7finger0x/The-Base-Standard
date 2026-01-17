@@ -18,6 +18,7 @@ import { base } from 'viem/chains';
 import { BASE_RPC_URL, PONDER_URL } from '@/lib/env';
 import { env } from '@/lib/env';
 import { RequestLogger } from '@/lib/request-logger';
+import { ProtocolRegistry, ONCHAIN_SUMMER_CONTRACTS, HACKATHON_CONTRACTS } from './protocol-registry';
 
 /**
  * BaseScan API transaction response format
@@ -291,7 +292,7 @@ export class MetricsCollector {
                     
                     contractInteractionsMap.set(contractAddr, {
                       contractAddress: contractAddr,
-                      contractTier: 'tier3', // Default, would need protocol registry
+                      contractTier: ProtocolRegistry.getProtocolTier(contractAddr),
                       interactionCount: (existing?.interactionCount || 0) + 1,
                       firstInteraction: existing?.firstInteraction || timestamp,
                       lastInteraction: timestamp,
@@ -363,7 +364,7 @@ export class MetricsCollector {
         } else {
           interactionsMap.set(contractAddr, {
             contractAddress: contractAddr,
-            contractTier: 'tier3', // TODO: Map to protocol registry
+            contractTier: ProtocolRegistry.getProtocolTier(contractAddr),
             interactionCount: 1,
             firstInteraction: tx.timestamp,
             lastInteraction: tx.timestamp,
@@ -999,6 +1000,12 @@ export class MetricsCollector {
       ? Math.floor((Date.now() / 1000 - lastActiveTimestamp) / 86400)
       : 0;
 
+    // Calculate Onchain Summer badges
+    const onchainSummerBadges = this.countOnchainSummerBadges(onChain.transactions);
+
+    // Determine hackathon placement
+    const hackathonPlacement = this.determineHackathonPlacement(onChain.transactions);
+
     return {
       activeMonths,
       consecutiveStreak,
@@ -1024,8 +1031,8 @@ export class MetricsCollector {
       zoraCreatorVolume: zora.creatorVolume || 0,
       hasCoinbaseAttestation: identity.hasCoinbaseAttestation,
       gitcoinPassportScore: identity.gitcoinPassportScore,
-      onchainSummerBadges: 0, // TODO: Query Onchain Summer badge contracts
-      hackathonPlacement: undefined, // TODO: Query hackathon participation
+      onchainSummerBadges,
+      hackathonPlacement,
       earlyAdopterVintage,
       lastActiveTimestamp,
       daysSinceLastActivity,
@@ -1056,19 +1063,50 @@ export class MetricsCollector {
 
   /**
    * Calculate liquidity metrics
+   * Analyzes transactions for DeFi liquidity positions
    */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private static calculateLiquidityMetrics(_transactions: Transaction[]): {
+  private static calculateLiquidityMetrics(transactions: Transaction[]): {
     durationDays: number;
     positions: number;
     lendingUtilization: number;
   } {
-    // TODO: Parse liquidity position events from transactions
-    // For now, return placeholder structure
+    // Track liquidity-related interactions
+    const liquidityTxs = transactions.filter(tx => {
+      if (!tx.to) return false;
+      const protocol = ProtocolRegistry.getProtocol(tx.to);
+      return protocol?.category === 'DEX' || protocol?.category === 'Lending';
+    });
+
+    if (liquidityTxs.length === 0) {
+      return {
+        durationDays: 0,
+        positions: 0,
+        lendingUtilization: 0,
+      };
+    }
+
+    // Count unique liquidity positions (unique DEX/Lending contracts)
+    const positions = new Set(liquidityTxs.map(tx => tx.to)).size;
+
+    // Calculate duration (first to last liquidity tx)
+    const timestamps = liquidityTxs.map(tx => tx.timestamp).sort((a, b) => a - b);
+    const durationDays = timestamps.length > 1
+      ? Math.floor((timestamps[timestamps.length - 1] - timestamps[0]) / 86400)
+      : 0;
+
+    // Estimate lending utilization (ratio of lending interactions)
+    const lendingTxs = liquidityTxs.filter(tx => {
+      const protocol = ProtocolRegistry.getProtocol(tx.to!);
+      return protocol?.category === 'Lending';
+    });
+    const lendingUtilization = liquidityTxs.length > 0
+      ? lendingTxs.length / liquidityTxs.length
+      : 0;
+
     return {
-      durationDays: 0,
-      positions: 0,
-      lendingUtilization: 0,
+      durationDays,
+      positions,
+      lendingUtilization,
     };
   }
 
@@ -1090,17 +1128,23 @@ export class MetricsCollector {
     categories: string[];
   } {
     const uniqueProtocols = new Set(interactions.map(i => i.contractAddress)).size;
-    
+
     // Count vintage contracts (deployed >1 year ago)
     const oneYearAgo = Date.now() / 1000 - (365 * 24 * 60 * 60);
-    const vintageContracts = interactions.filter(i => 
+    const vintageContracts = interactions.filter(i =>
       i.firstInteraction < oneYearAgo
     ).length;
-    
-    // Extract protocol categories (simplified - would need protocol registry)
-    const categories: string[] = [];
-    // TODO: Map contract addresses to protocol categories
-    
+
+    // Extract protocol categories from registry
+    const categorySet = new Set<string>();
+    interactions.forEach(i => {
+      const category = ProtocolRegistry.getProtocolCategory(i.contractAddress);
+      if (category) {
+        categorySet.add(category);
+      }
+    });
+    const categories = Array.from(categorySet);
+
     return {
       uniqueProtocols,
       vintageContracts,
@@ -1180,13 +1224,53 @@ export class MetricsCollector {
   }
 
   /**
-   * Calculate total volume in USD (simplified - uses ETH price)
+   * Calculate total volume in USD
+   * Uses current ETH price as approximation (in production, use historical prices)
    */
   private static calculateVolumeUSD(transactions: Transaction[]): number {
-    // TODO: Use actual USD conversion with historical prices
     const totalETH = transactions.reduce((sum, tx) => sum + tx.value, 0n);
-    const ethPrice = 2500; // Placeholder - should fetch from oracle
+
+    // Use environment variable for ETH price or default
+    // In production, fetch from Chainlink oracle or price API
+    const ethPrice = parseFloat(process.env.NEXT_PUBLIC_ETH_PRICE || '2500');
+
     return (Number(totalETH) / 1e18) * ethPrice;
+  }
+
+  /**
+   * Count Onchain Summer badges held by address
+   */
+  private static countOnchainSummerBadges(transactions: Transaction[]): number {
+    // Count interactions with known Onchain Summer badge contracts
+    const badgeInteractions = transactions.filter(tx =>
+      tx.to && ONCHAIN_SUMMER_CONTRACTS.includes(tx.to.toLowerCase())
+    );
+
+    // Count unique badge contracts interacted with
+    const uniqueBadges = new Set(
+      badgeInteractions.map(tx => tx.to?.toLowerCase()).filter(Boolean)
+    );
+
+    return uniqueBadges.size;
+  }
+
+  /**
+   * Determine hackathon placement based on badge holdings
+   */
+  private static determineHackathonPlacement(transactions: Transaction[]): 'winner' | 'finalist' | 'submission' | undefined {
+    // Check for hackathon badge interactions
+    const hackathonInteractions = transactions.filter(tx =>
+      tx.to && HACKATHON_CONTRACTS.includes(tx.to.toLowerCase())
+    );
+
+    if (hackathonInteractions.length === 0) {
+      return undefined;
+    }
+
+    // In a real implementation, we'd query the specific badge contract
+    // to determine placement (winner, finalist, submission)
+    // For now, return submission if any hackathon interaction exists
+    return 'submission';
   }
 
   /**
