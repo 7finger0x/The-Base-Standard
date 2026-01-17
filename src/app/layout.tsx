@@ -62,7 +62,7 @@ export default function RootLayout({
           />
         )}
       </head>
-      <body className="min-h-screen bg-white text-gray-900 antialiased">
+      <body className="min-h-screen bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 antialiased transition-colors">
         <MyStatsig>
           <Providers>{children}</Providers>
         </MyStatsig>

@@ -7,7 +7,7 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 interface TierCardMinterProps {
-  tier: 'BRONZE' | 'SILVER' | 'GOLD' | 'BASED';
+  tier: 'TOURIST' | 'BRONZE' | 'SILVER' | 'GOLD' | 'BASED';
   score: string;
   descriptor: string;
   mintPrice?: string;
@@ -30,6 +30,7 @@ const TIER_NFT_ABI = [
 ] as const;
 
 const TIER_IDS = {
+  TOURIST: 0,
   BRONZE: 1,
   SILVER: 2,
   GOLD: 3,
@@ -38,6 +39,7 @@ const TIER_IDS = {
 
 // Tier card image mappings
 const TIER_IMAGES = {
+  TOURIST: '/images/tiers/tourist.png',
   BRONZE: '/images/tiers/bronze.png',
   SILVER: '/images/tiers/silver.png',
   GOLD: '/images/tiers/gold.png',

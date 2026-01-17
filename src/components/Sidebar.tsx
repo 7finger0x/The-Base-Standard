@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useAccount, useConnect } from 'wagmi';
 import { ChevronRight } from 'lucide-react';
 import { Logo } from './Logo';
+import { ThemeToggle } from './ThemeToggle';
 import { cn } from '@/lib/utils';
 
 interface NavItem {
@@ -35,10 +36,15 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="fixed left-0 top-0 h-full w-64 bg-white border-r border-gray-200 flex flex-col z-50">
-      {/* Logo */}
-      <div className="p-6 border-b border-gray-200">
-        <Logo variant="full" size="md" />
+    <aside className="fixed left-0 top-0 h-full w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col z-50 transition-colors">
+      {/* Logo and Theme Toggle */}
+      <div className="p-6 border-b border-gray-200 dark:border-gray-800">
+        <div className="flex items-center justify-between mb-4">
+          <Logo variant="full" size="md" />
+        </div>
+        <div className="flex justify-end">
+          <ThemeToggle />
+        </div>
       </div>
 
       {/* Navigation */}
@@ -53,8 +59,8 @@ export function Sidebar() {
                   className={cn(
                     'flex items-center justify-between px-4 py-2.5 rounded-lg text-sm font-medium transition-colors',
                     isActive
-                      ? 'bg-blue-50 text-blue-600'
-                      : 'text-gray-700 hover:bg-gray-50 hover:text-gray-900'
+                      ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400'
+                      : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
                   )}
                 >
                   <span>{item.label}</span>

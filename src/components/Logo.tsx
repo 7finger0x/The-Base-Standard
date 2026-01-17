@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import { cn } from '@/lib/utils';
 
 interface LogoProps {
@@ -11,21 +12,20 @@ interface LogoProps {
 
 /**
  * Logo component for The Base Standard
- * 
+ *
  * Supports multiple variants:
  * - full: Full logo with wordmark
  * - icon: Icon only
- * - text: Text only (fallback)
- * 
- * When logo files are added to /public/, this component will automatically use them.
- * Falls back to gradient badge if logo files don't exist.
+ * - text: Text only
+ *
+ * Uses actual logo images from /public/images/logos/
  */
 export function Logo({ variant = 'icon', size = 'md', className, showText = true }: LogoProps) {
-  const sizeClasses = {
-    sm: 'w-6 h-6',
-    md: 'w-10 h-10',
-    lg: 'w-16 h-16',
-    xl: 'w-24 h-24',
+  const sizeValues = {
+    sm: 32,
+    md: 40,
+    lg: 48,
+    xl: 64,
   };
 
   const textSizeClasses = {
@@ -35,30 +35,26 @@ export function Logo({ variant = 'icon', size = 'md', className, showText = true
     xl: 'text-4xl',
   };
 
+  const logoSize = sizeValues[size];
+
   return (
     <div className={cn('flex items-center gap-3', className)}>
-      {/* Logo Image/Icon - Solid Blue Square for Light Theme */}
-      <div className={cn(
-        'bg-blue-600 flex items-center justify-center flex-shrink-0 relative',
-        size === 'sm' ? 'w-8 h-8' : size === 'md' ? 'w-10 h-10' : size === 'lg' ? 'w-12 h-12' : 'w-16 h-16',
-        className
-      )}>
-        <div className="relative w-full h-full flex items-center justify-center">
-          {/* BS Text */}
-          <span className={cn(
-            'text-white font-black leading-none',
-            size === 'sm' ? 'text-xs' : size === 'md' ? 'text-sm' : size === 'lg' ? 'text-base' : 'text-lg'
-          )}>
-            BS
-          </span>
-        </div>
+      {/* Logo Image - Hexagonal BS Logo */}
+      <div className={cn('flex-shrink-0 relative')} style={{ width: logoSize, height: logoSize }}>
+        <Image
+          src="/images/logos/logo-hex.png"
+          alt="The Base Standard"
+          fill
+          className="object-contain"
+          priority
+        />
       </div>
 
       {/* Text/Wordmark */}
       {showText && variant !== 'icon' && (
         <div>
           <h1 className={cn(
-            'font-black tracking-tight text-gray-900',
+            'font-black tracking-tight text-gray-900 dark:text-white',
             textSizeClasses[size]
           )}>
             The Base Standard

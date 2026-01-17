@@ -6,12 +6,13 @@ This directory contains the tier card logo images for The Base Standard NFT mint
 
 **You provided beautiful tier card images!** Please save them to this directory with these exact filenames:
 
-### Required Files:
+### Required Files (5 Total):
 
-1. **`based.png`** - The "STATUS: BASED" card (blue/purple electric theme)
-2. **`bronze.png`** - Bronze tier card (100-499 score, copper/bronze theme)
+1. **`based.png`** - The "STATUS: BASED" card (blue/purple electric theme, 851+)
+2. **`gold.png`** - Gold tier card (850+ score, gold theme)
 3. **`silver.png`** - Silver tier card (500-849 score, silver theme)
-4. **`gold.png`** - Gold tier card (850+ score, gold theme)
+4. **`bronze.png`** - Bronze tier card (100-499 score, copper/bronze theme)
+5. **`tourist.png`** - Tourist tier card (0-99 score, gray/entry theme)
 
 ### How to Add Images:
 
@@ -19,11 +20,12 @@ This directory contains the tier card logo images for The Base Standard NFT mint
 # From your project root:
 cd /home/user/The-Base-Standard/public/images/tiers/
 
-# Place your 4 tier card PNG files here:
+# Place your 5 tier card PNG files here:
 # - based.png
-# - bronze.png
-# - silver.png
 # - gold.png
+# - silver.png
+# - bronze.png
+# - tourist.png
 ```
 
 ## Image Specifications
@@ -51,6 +53,7 @@ The images are referenced in `/src/components/TierCardMinter.tsx`:
 
 ```typescript
 const TIER_IMAGES = {
+  TOURIST: '/images/tiers/tourist.png',
   BRONZE: '/images/tiers/bronze.png',
   SILVER: '/images/tiers/silver.png',
   GOLD: '/images/tiers/gold.png',

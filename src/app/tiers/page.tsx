@@ -73,6 +73,13 @@ const nftTiers = [
     mintPrice: '0.001',
     minScore: 100,
   },
+  {
+    tier: 'TOURIST' as const,
+    score: '0-99',
+    descriptor: 'Welcome to Base',
+    mintPrice: '0.0005',
+    minScore: 0,
+  },
 ];
 
 export default function TiersPage() {
@@ -174,7 +181,7 @@ export default function TiersPage() {
                   </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
                   {nftTiers.map((nftTier) => (
                     <TierCardMinter
                       key={nftTier.tier}

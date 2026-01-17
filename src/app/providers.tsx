@@ -17,6 +17,7 @@ import { OnchainKitProvider } from '@coinbase/onchainkit';
 import { SessionProvider } from 'next-auth/react';
 import { base } from 'wagmi/chains';
 import { wagmiConfig } from '@/lib/wagmi';
+import { ThemeProvider } from '@/contexts/ThemeContext';
 import { useState } from 'react';
 
 export function Providers({ children }: { children: React.ReactNode }) {
@@ -33,17 +34,19 @@ export function Providers({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <SessionProvider>
-      <WagmiProvider config={wagmiConfig}>
-        <QueryClientProvider client={queryClient}>
-          <OnchainKitProvider
-            chain={base}
-            apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
-          >
-            {children}
-          </OnchainKitProvider>
-        </QueryClientProvider>
-      </WagmiProvider>
-    </SessionProvider>
+    <ThemeProvider>
+      <SessionProvider>
+        <WagmiProvider config={wagmiConfig}>
+          <QueryClientProvider client={queryClient}>
+            <OnchainKitProvider
+              chain={base}
+              apiKey={process.env.NEXT_PUBLIC_ONCHAINKIT_API_KEY}
+            >
+              {children}
+            </OnchainKitProvider>
+          </QueryClientProvider>
+        </WagmiProvider>
+      </SessionProvider>
+    </ThemeProvider>
   );
 }
