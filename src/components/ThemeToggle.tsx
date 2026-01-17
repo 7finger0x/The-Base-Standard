@@ -2,9 +2,22 @@
 
 import { useTheme } from '@/contexts/ThemeContext';
 import { Moon, Sun } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 export function ThemeToggle() {
+  const [mounted, setMounted] = useState(false);
   const { theme, toggleTheme } = useTheme();
+
+  // Only render after mounting to avoid SSR mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return (
+      <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 w-9 h-9" />
+    );
+  }
 
   return (
     <button
