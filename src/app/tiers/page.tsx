@@ -86,11 +86,9 @@ const nftTiers = [
 export default function TiersPage() {
   const { address } = useAccount();
   const [userScore, setUserScore] = useState<number | undefined>(undefined);
-  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (address) {
-      setIsLoading(true);
       fetch(`/api/reputation?address=${address}`)
         .then((res) => res.json())
         .then((data) => {
@@ -98,9 +96,6 @@ export default function TiersPage() {
         })
         .catch((err) => {
           console.error('Error fetching reputation:', err);
-        })
-        .finally(() => {
-          setIsLoading(false);
         });
     }
   }, [address]);

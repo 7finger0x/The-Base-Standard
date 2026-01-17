@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAccount } from 'wagmi';
 import { Share2, Copy, Check, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -13,7 +13,6 @@ interface ReferralStats {
   pointsPerReferral: number;
 }
 
-const MAX_REFERRALS = 10;
 const POINTS_PER_REFERRAL = 10;
 
 export function ReferralSystem() {
@@ -22,13 +21,7 @@ export function ReferralSystem() {
   const [copied, setCopied] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    if (address) {
-      fetchReferralStats();
-    }
-  }, [address]);
-
-  const fetchReferralStats = async () => {
+  const fetchReferralStats = useCallback(async () => {
     if (!address) return;
 
     setIsLoading(true);
@@ -43,7 +36,13 @@ export function ReferralSystem() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [address]);
+
+  useEffect(() => {
+    if (address) {
+      fetchReferralStats();
+    }
+  }, [address, fetchReferralStats]);
 
   const copyReferralLink = () => {
     if (!stats) return;
@@ -67,7 +66,7 @@ export function ReferralSystem() {
     if (navigator.share) {
       try {
         await navigator.share(shareData);
-      } catch (err) {
+      } catch {
         copyReferralLink();
       }
     } else {
@@ -181,7 +180,7 @@ export function ReferralSystem() {
           </>
         ) : (
           <>
-            You've reached the maximum number of referrals! Thanks for spreading the word about The Base Standard.
+            You have reached the maximum number of referrals! Thanks for spreading the word about The Base Standard.
           </>
         )}
       </div>

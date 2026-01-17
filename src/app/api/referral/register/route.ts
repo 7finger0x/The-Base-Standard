@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-const MAX_REFERRALS = 10;
 const POINTS_PER_REFERRAL = 10;
 
 /**

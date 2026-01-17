@@ -49,7 +49,7 @@ const TIER_IMAGES = {
 export function TierCardMinter({
   tier,
   score,
-  descriptor,
+  descriptor: _descriptor,
   mintPrice = '0.001',
   userScore,
   className,
