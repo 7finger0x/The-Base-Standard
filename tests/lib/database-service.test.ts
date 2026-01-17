@@ -262,7 +262,7 @@ describe('DatabaseService', () => {
       prisma.activityLog.create.mockResolvedValueOnce({} as any);
 
       await service.logActivity('user-1', 'mint', {
-        metadata: { nftId: 123 },
+        metadata: { nftId: 123 } as any,
       });
 
       expect(prisma.activityLog.create).toHaveBeenCalledWith({
