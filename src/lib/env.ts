@@ -4,8 +4,9 @@ import { z } from 'zod';
 const envSchema = z.object({
   // Required environment variables
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  DATABASE_URL: z.string().min(1, 'DATABASE_URL is required').optional().default('file:./dev.db'),
-  
+  DATABASE_URL: z.string().min(1, 'DATABASE_URL is required').optional(),
+  DIRECT_URL: z.string().optional(), // Required for Prisma with connection pooling (Vercel Postgres, Neon, etc.)
+
   // Base Network Configuration
   NEXT_PUBLIC_BASE_RPC_URL: z.string().url().or(z.literal('')).optional(),
   NEXT_PUBLIC_CHAIN_ID: z.string().optional(),
@@ -56,13 +57,10 @@ function validateEnvironment(): EnvVariables {
         console.error(`   - ${varName}`);
       });
 
-      // During build, use defaults. In runtime, this will be caught
+      // During build, allow missing optional values
       if (process.env.NEXT_PHASE === 'phase-production-build') {
-        console.warn('⚠️  Build-time: Using default values. Set proper values before deployment!');
-        return envSchema.parse({
-          ...process.env,
-          DATABASE_URL: 'file:./dev.db',
-        });
+        console.warn('⚠️  Build-time: Some environment variables are missing. Set proper values in Vercel!');
+        return envSchema.parse(process.env);
       }
 
       throw new Error(`Environment validation failed: ${missingVars.join(', ')}`);
