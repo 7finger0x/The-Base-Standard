@@ -24,9 +24,11 @@ const nextConfig: NextConfig = {
     config.externals.push('pino-pretty', 'lokijs', 'encoding');
 
     // Ignore React Native Async Storage (used by MetaMask SDK)
+    // and stub out problematic porto connector that requires unavailable viem features
     config.resolve.alias = {
       ...config.resolve.alias,
       '@react-native-async-storage/async-storage': false,
+      'porto': false,
     };
 
     return config;
