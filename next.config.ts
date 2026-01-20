@@ -4,6 +4,8 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   // Enable standalone output for Docker
   output: process.env.DOCKER_BUILD === 'true' ? 'standalone' : undefined,
+  // External packages that should not be bundled (moved from experimental.serverComponentsExternalPackages)
+  serverExternalPackages: ['pino-pretty', 'lokijs', 'encoding'],
   images: {
     remotePatterns: [
       {
